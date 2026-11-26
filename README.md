@@ -55,7 +55,7 @@ In the wider language-model catalog, an iteration can produce a [revised draft](
 
 [![Architectures of Ouro-Thinking 2.6B, Nanbeige 4.2 3B, GLM-5.4, Dory1.0 4B and Inkling 2 Mini. The colored paths show which layers run again.](assets/five-loop-transformer-architectures.jpg)](assets/five-loop-transformer-architectures.jpg)
 
-**Figure source** · Sebastian Raschka, 24 November 2026. The screenshot adds two red outlines to the original comparison. [Original post on X](https://x.com/rasbt/status/2125249956495953973) · [Full-resolution figure](https://pbs.twimg.com/media/HX5njjzXIAAYbxm?format=jpg&name=orig) · [LLM Architecture Gallery](https://sebastianraschka.com/llm-architecture-gallery/looped-depth-sharing/)
+**Figure source** · Sebastian Raschka, 24 November 2026. [Original post on X](https://x.com/rasbt/status/2125249956495953973) · [Full-resolution figure](https://pbs.twimg.com/media/HX5njjzXIAAYbxm?format=jpg&name=orig) · [LLM Architecture Gallery](https://sebastianraschka.com/llm-architecture-gallery/looped-depth-sharing/)
 
 Follow the return arrow to see which layers process the same token again.
 
