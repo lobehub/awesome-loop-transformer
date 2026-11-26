@@ -1,10 +1,16 @@
 # Reports, implementations and analysis tools
 
-[Home](../README.md) · [Model weights](models-and-weights.md) · [Papers by topic](research-and-code.md)
+[Overview](../README.md) · [Selected readings](../README.md#selected-readings) · [BibTeX](../references.bib)
+
+## Contents
+
+- [Technical reports and implementations](#technical-reports-and-implementations)
+- [Analysis tools](#analysis-tools)
+- [Related lists](#related-lists)
 
 ## Technical reports and implementations
 
-| Release | What to look for in the report | Author resources |
+| Release report | Research focus | Author resources |
 | --- | --- | --- |
 | [Huginn recurrent-depth report](https://arxiv.org/abs/2502.05171) | How the recurrent block is pretrained and how performance changes as more compute is spent per token at inference. | [Training and evaluation code](https://github.com/seal-rg/recurrent-pretraining) · [Training dataset](https://huggingface.co/datasets/tomg-group-umd/huginn-dataset) |
 | [Scaling Latent Reasoning via Looped Language Models](https://arxiv.org/abs/2510.25741) | Ouro’s pretraining recipe and the objective used to learn when to exit. Its model card explains the runtime settings that enable adaptive exit. | [Project](https://ouro-llm.github.io/) · [Model card and exit settings](https://huggingface.co/ByteDance/Ouro-1.4B) |
