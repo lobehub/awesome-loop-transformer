@@ -1,5 +1,16 @@
 # Models and weights
 
+[![Architecture diagrams for Ouro-Thinking 2.6B, Nanbeige 4.2 3B, GLM-5.4, Dory1.0 4B and Inkling 2 Mini.](../assets/five-loop-transformer-architectures.jpg)](../assets/five-loop-transformer-architectures.jpg)
+
+Ouro and Nanbeige repeat the full decoder stack. GLM-5.4, Dory and Inkling repeat a middle block of layers. Diagrams by Sebastian Raschka. [LLM Architecture Gallery](https://sebastianraschka.com/llm-architecture-gallery/looped-depth-sharing/) · [Per-model sources and layer counts](model-architectures.md#five-released-decoder-designs)
+
+<details>
+<summary>View the five decoder schedules side by side</summary>
+
+![Execution order, distinct blocks and total block applications for the five models.](../assets/decoder-depth-comparison.png)
+
+</details>
+
 [Overview](../README.md) · [Architecture figures](model-architectures.md) · [Selected readings](../README.md#selected-readings) · [BibTeX](../references.bib)
 
 Checkpoint links open the publisher’s file tree. Each entry was checked for public weight files on 2026-11-26. License labels come from the individual model cards; “unspecified” means the card metadata does not declare a weight license. For sharded releases, the file tree includes the index and individual shards.
