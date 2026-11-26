@@ -1,9 +1,9 @@
+![A Transformer block feeds its updated hidden state back into the same block, reusing its weights across depth.](assets/loop-transformer-cover.png)
+
 <h1 align="center">
   awesome-loop-transformer
   <a href="https://awesome.re"><img src="https://awesome.re/badge-flat.svg" alt="Awesome"></a>
 </h1>
-
-![A Transformer block feeds its updated hidden state back into the same block, reusing its weights across depth.](assets/loop-transformer-cover.png)
 
 <p align="center">
   <a href="references.bib"><img src="https://img.shields.io/badge/References-BibTeX-233b75?style=flat" alt="References in BibTeX"></a>
