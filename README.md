@@ -1,4 +1,4 @@
-# Awesome Loops in Language Models [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
+# awesome-Loop-Transformer [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
 
 Papers, models, downloadable weights and technical reports on repeated computation in language models. A loop can refine a hidden state, carry memory into the next segment, revise a draft, act on feedback or produce the training data for a later model. The Looped Transformer collection also covers related work in vision, control and algorithmic reasoning.
 
