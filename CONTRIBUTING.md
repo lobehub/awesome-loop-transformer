@@ -9,3 +9,5 @@ Place work on shared layers, recurrent depth and their applications in the [Loop
 - **Technical reports.** Add the release to [reports and tools](docs/reports-and-tools.md). Link the authors’ report and, where available, the architecture implementation, training recipe, or evaluation harness.
 
 When a paper describes an unreleased model, list the paper and identify any available artifacts. Use the [models and weights catalog](docs/models-and-weights.md) for downloadable releases. For efficiency claims, say which quantity the experiment holds fixed, such as unique parameters, executed depth, training FLOPs, or inference budget.
+
+Edit catalog entries in their topic pages under `docs/`, then run `python3 scripts/update_readme.py` to refresh the corresponding sections on the homepage.
