@@ -24,7 +24,7 @@ The collection includes **85 papers on looped Transformers**, **31 on related la
 
 1. **How does a layer loop?** Figure 2 of Dehghani et al. (2018) shows attention mixing information across positions and the same block updating each position across depth. [Universal Transformers, Fig. 2](https://arxiv.org/html/1807.03819v3#S2.F2)
 2. **What can the shared update learn?** Yang et al. (2023) compare looped and untied Transformers on in-context linear regression. Follow how prediction error changes with each pass. [Looped Transformers are Better at Learning Learning Algorithms](https://arxiv.org/abs/2311.12424) · [Experiments](https://github.com/Leiay/looped_transformer)
-3. **What does another pass buy at inference?** Geiping et al. (2025) vary the recurrent depth of one Huginn checkpoint. Its `num_steps` setting lets you compare depths with the prompt and decoding settings held fixed. [Scaling up Test-Time Compute with Latent Reasoning](https://arxiv.org/abs/2502.05171) · [NeurIPS proceedings](https://proceedings.neurips.cc/paper_files/paper/2025/hash/3b01972cf31e6fa0fe29e4b8b5c2a0a1-Abstract-Conference.html) · [Checkpoint](https://huggingface.co/tomg-group-umd/huginn-0125)
+3. **What does another pass buy at inference?** Geiping et al. (2025) vary the recurrent depth of one Huginn checkpoint. Its `num_steps` setting lets you compare depths with the prompt and decoding settings held fixed. [Scaling up Test-Time Compute with Latent Reasoning](https://arxiv.org/abs/2502.05171) · [NeurIPS proceedings](https://proceedings.neurips.cc/paper_files/paper/2025/hash/3b01972cf31e6fa0fe29e4b8b5c2a0a1-Abstract-Conference.html) · [Checkpoint](https://huggingface.co/tomg-group-umd/huginn-0125) · [Compare four ways to spend compute](#what-does-another-pass-buy)
 4. **Can we read the intermediate states?** Lu et al. (2025) compare two probes at the same depth in Huginn. The probes differ in which intermediate arithmetic results they recover. [Latent Chain-of-Thought?](https://arxiv.org/abs/2507.02199) · [Probe code](https://github.com/wenquanlu/huginn-latent-cot)
 5. **What does sharing save during training?** Schwethelm et al. (2026) report a four-pass 410M model matching the validation loss of a 580M untied model at roughly the training cost of a 1B untied model. [How Much Is One Recurrence Worth?](https://arxiv.org/abs/2604.21106) · [Scaling experiments](https://github.com/kschwethelm/looped-lm-scaling)
 
@@ -46,6 +46,19 @@ The collection includes **85 papers on looped Transformers**, **31 on related la
 | **How is the loop introduced?** | [Huginn](#huginn) is pretrained with a recurrent core. [LoopUS](#loopus) converts a pretrained backbone and trains it to reuse a block. In [Training-Free Looped Transformers](#paper-training-free-looped-transformers), an inference wrapper applies smaller residual updates on repeated passes through a frozen checkpoint. |
 
 [Latent Feedback](#model-latent-feedback) carries a hidden state into the next token. [Trading Depth for Time](#paper-trading-depth) tests what happens when an extra latent step fits between two tokens at a fixed decoding budget. Elsewhere in the catalog, an iteration can produce a [revised draft](#editing-and-denoising-text), [feedback or a tool observation](#feedback-retrieval-and-search), or [updated model weights](#training-across-rounds).
+
+### What does another pass buy?
+
+Huginn changes the depth **after training**. LoopCoder-v2 chooses it **before training**. MoR lets tokens take different paths, and *Trading Depth for Time* asks where to spend a fixed number of block applications.
+
+[![Four experiments compare inference depth for one Huginn checkpoint, separately trained LoopCoder-v2 models, token routing in MoR, and depth versus time at a fixed decoding budget.](assets/compute-budget-comparisons.svg)](assets/compute-budget-comparisons.svg)
+
+| Study | What the authors compare | What the experiment shows |
+| --- | --- | --- |
+| [Huginn, Table 1](https://arxiv.org/html/2502.05171v2#S4.T1) | Evaluate the same 3.5B checkpoint at 8, 16 and 32 recurrent passes. Each doubling spends more inference compute. | Zero-shot HellaSwag normalized accuracy rose from 58.54% to 64.67% to 65.21%. The second doubling added 0.54 percentage points on this task. |
+| [LoopCoder-v2, Table 2](https://arxiv.org/html/2606.18023v1#S3.T2) | Train four 7B models with 1, 2, 3 or 4 passes, each on 18T pretraining tokens with matched instruction tuning. | On SWE-bench Verified the four models resolved 43.0%, 64.4%, 27.6% and 22.4% of issues. Two passes worked best among these training configurations. |
+| [MoR, Table 3](https://arxiv.org/html/2507.10524v3#S3.T3) | Compare fixed three-pass recurrence with expert-choice routing up to three passes. Both use 118M non-embedding parameters and 16.5 × 10¹⁸ training FLOPs. | FineWeb-Edu validation negative log-likelihood fell from 2.8466 (fixed) to 2.7925 (routed). The routed run processed 30B training tokens and the fixed run 20B, so the comparison includes the extra data seen. |
+| [Trading Depth for Time, Fig. 3](https://arxiv.org/html/2609.21605v2#S2.F3) · [Table 4](https://arxiv.org/html/2609.21605v2#A1.T4) | Each model runs 2L blocks per output token, where L is the reference backbone depth. Compare doubled physical depth, two passes through shared layers, and a latent step between vocabulary tokens. | At the largest matched training-compute budget, validation bits per byte were 0.717 (double depth), 0.729 (two passes) and 0.718 (latent step). The latent-step model saw about half as many unique training tokens as the other two. |
 
 ## Models and weights
 

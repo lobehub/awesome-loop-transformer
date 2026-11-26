@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="508" viewBox="0 0 960 508" role="img" aria-labelledby="title desc">
+  <title id="title">Four ways to spend compute on a looped Transformer</title>
+  <desc id="desc">Huginn evaluates one checkpoint at three depths. LoopCoder-v2 trains four models with different pass counts. Mixture-of-Recursions routes individual tokens through a shared block. Trading Depth for Time compares three ways to spend two backbone passes per output token.</desc>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; fill: #1e293b; }
+    .heading { font-family: Georgia, "Times New Roman", serif; font-weight: bold; font-size: 26px; }
+    .label { font-size: 16px; }
+    .small { font-size: 15px; fill: #42566b; }
+    .strong { font-size: 16px; font-weight: 650; }
+    .cell { fill: #e1f2f1; stroke: #3b7274; }
+    .other { fill: #f4ebdd; stroke: #90683b; }
+    .link { fill: none; stroke: #567372; stroke-width: 1.8; }
+    .rule { stroke: #c7d3d7; }
+    .center { text-anchor: middle; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M0 0 L8 4 L0 8 Z" fill="#567372"/>
+    </marker>
+    <g id="visit">
+      <rect width="63" height="25" rx="4" fill="#347676"/>
+      <path d="m26 12 4 4 8-8" fill="none" stroke="white" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g id="skip">
+      <rect width="63" height="25" rx="4" fill="#f3f5f5" stroke="#d2dadd"/>
+      <path d="M27 12.5h9" stroke="#677981" stroke-width="1.8"/>
+    </g>
+  </defs>
+
+  <rect width="960" height="508" fill="#fcfdfb"/>
+  <path class="rule" d="M480 15v478 M16 249h928"/>
+
+  <g transform="translate(24,15)">
+    <text class="heading" y="28">Huginn</text>
+    <text class="label" y="57">Run one checkpoint at three inference depths.</text>
+    <rect class="cell" x="4" y="108" width="130" height="58" rx="6"/>
+    <text class="strong center" x="69" y="133">3.5B model</text>
+    <text class="small center" x="69" y="153">same weights</text>
+    <path class="link" d="M134 137h29 M163 97v80"/>
+    <path class="link" d="M163 97h21 M163 137h21 M163 177h21" />
+    <g class="label center">
+      <rect class="cell" x="184" y="82" width="104" height="30" rx="4"/>
+      <rect class="cell" x="184" y="122" width="104" height="30" rx="4"/>
+      <rect class="cell" x="184" y="162" width="104" height="30" rx="4"/>
+      <text x="236" y="103">8 passes</text>
+      <text x="236" y="143">16 passes</text>
+      <text x="236" y="183">32 passes</text>
+    </g>
+    <path class="link" d="M291 97h24" marker-end="url(#arrow)"/>
+    <path class="link" d="M291 137h24" marker-end="url(#arrow)"/>
+    <path class="link" d="M291 177h24" marker-end="url(#arrow)"/>
+    <g class="strong">
+      <text x="326" y="103">58.54%</text>
+      <text x="326" y="143">64.67%</text>
+      <text x="326" y="183">65.21%</text>
+    </g>
+    <text class="small" y="217">Zero-shot HellaSwag normalized accuracy</text>
+  </g>
+
+  <g transform="translate(503,15)">
+    <text class="heading" y="28">LoopCoder-v2</text>
+    <text class="label" y="57">Train one 7B model for each pass count.</text>
+    <g class="label">
+      <text y="95">1 pass</text>
+      <text y="125">2 passes</text>
+      <text y="155">3 passes</text>
+      <text y="185">4 passes</text>
+    </g>
+    <path class="rule" d="M84 76v112"/>
+    <g fill="#859ca7">
+      <rect x="85" y="81" width="129" height="15"/>
+      <rect x="85" y="111" width="193.2" height="15" fill="#347676"/>
+      <rect x="85" y="141" width="82.8" height="15"/>
+      <rect x="85" y="171" width="67.2" height="15"/>
+    </g>
+    <g class="strong">
+      <text x="222" y="95">43.0%</text>
+      <text x="286" y="125">64.4%</text>
+      <text x="176" y="155">27.6%</text>
+      <text x="160" y="185">22.4%</text>
+    </g>
+    <text class="small" y="217">SWE-bench Verified issues resolved</text>
+  </g>
+
+  <g transform="translate(24,265)">
+    <text class="heading" y="28">Mixture-of-Recursions</text>
+    <text class="label" y="57">The router selects which tokens continue.</text>
+    <g class="small center">
+      <text x="148" y="88">Pass 1</text>
+      <text x="225" y="88">Pass 2</text>
+      <text x="302" y="88">Pass 3</text>
+    </g>
+    <g class="label">
+      <text y="120">Token A</text>
+      <text y="152">Token B</text>
+      <text y="184">Token C</text>
+    </g>
+    <g xmlns:xlink="http://www.w3.org/1999/xlink">
+      <use xlink:href="#visit" x="117" y="100"/>
+      <use xlink:href="#skip" x="194" y="100"/>
+      <use xlink:href="#skip" x="271" y="100"/>
+      <use xlink:href="#visit" x="117" y="132"/>
+      <use xlink:href="#visit" x="194" y="132"/>
+      <use xlink:href="#skip" x="271" y="132"/>
+      <use xlink:href="#visit" x="117" y="164"/>
+      <use xlink:href="#visit" x="194" y="164"/>
+      <use xlink:href="#visit" x="271" y="164"/>
+    </g>
+    <text class="small" y="218">Illustrative routes. A check marks an active token.</text>
+  </g>
+
+  <g transform="translate(503,265)">
+    <text class="heading" y="28">Trading Depth for Time</text>
+    <text class="label" y="57">Spend 2L block applications per output token.</text>
+    <g class="label">
+      <text y="110">Dense</text>
+      <text y="148">Two-loop</text>
+      <text y="186">Temporal</text>
+    </g>
+    <g class="label center">
+      <rect class="cell" x="87" y="90" width="126" height="30" rx="4"/>
+      <rect class="other" x="247" y="90" width="144" height="30" rx="4"/>
+      <text x="150" y="111">First L layers</text><text x="319" y="111">Next L layers</text>
+      <rect class="cell" x="87" y="128" width="126" height="30" rx="4"/>
+      <rect class="cell" x="247" y="128" width="144" height="30" rx="4"/>
+      <text x="150" y="149">L layers</text><text x="319" y="149">Same L layers</text>
+      <rect class="cell" x="87" y="166" width="126" height="30" rx="4"/>
+      <rect class="cell" x="247" y="166" width="144" height="30" rx="4"/>
+      <text x="150" y="187">Token step</text><text x="319" y="187">Latent step</text>
+    </g>
+    <path class="link" d="M216 105h26" marker-end="url(#arrow)"/>
+    <path class="link" d="M216 143h26" marker-end="url(#arrow)"/>
+    <path class="link" d="M216 181h26" marker-end="url(#arrow)"/>
+    <text class="small" y="218">Each temporal step uses the same L-layer backbone.</text>
+  </g>
+</svg>
