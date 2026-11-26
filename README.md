@@ -12,7 +12,7 @@
 
 A **Loop Transformer** applies the same block of layers repeatedly to an evolving hidden state. Before predicting the next token, a language model can take several passes through that block while keeping the input prefix fixed. [Universal Transformers](https://arxiv.org/abs/1807.03819) · [Huginn](https://arxiv.org/abs/2502.05171)
 
-[Models and weights](#models-and-weights) · [Origins](#historical-development) · [Five papers to start with](#selected-readings) · [Papers by topic](#looped-transformer-papers) · [Other language model loops](#other-loops-in-language-models) · [Technical reports and tools](#technical-reports-and-tools)
+[Models and weights](#models-and-weights) · [Origins](#historical-development) · [Five papers to start with](#selected-readings) · [Papers by topic](#looped-transformer-papers) · [Other language model loops](#other-loops-in-language-models) · [Technical reports and tools](#technical-reports-and-tools) · [Contribute](#contributing)
 
 <!-- catalog:overview -->
 
@@ -533,8 +533,18 @@ For layer sharing, recurrent pretraining, halting and deployment, continue to th
 
 <!-- /catalog:reports -->
 
-## Bibliography and contributions
+<a id="bibliography-and-contributions"></a>
+
+## Bibliography
 
 Import the [BibTeX bibliography](references.bib) into a reference manager to cite individual works. The export retains the source records’ citation keys and years. A revised arXiv record can carry a later year than the first release shown in the index.
 
-[Contribution guide](CONTRIBUTING.md) · [Related reading lists](#related-lists)
+## Contributing
+
+Have a paper or model to recommend? [Suggest a resource](https://github.com/lobehub/awesome-loop-transformer/issues/new?template=suggest-a-resource.yml) with its primary source and a sentence explaining what repeats. To add an entry yourself, follow the [submission and review criteria](CONTRIBUTING.md), edit the relevant topic page, and open a pull request.
+
+## Star history
+
+![GitHub stars over time. Exact dates and counts are available in the accompanying CSV.](assets/star-history.svg)
+
+The chart starts on 26 November 2026. A weekly observation records the total number of stars at that time, including any decreases since the previous observation. [Download the observations](assets/star-history.csv) · [View stargazers](https://github.com/lobehub/awesome-loop-transformer/stargazers)

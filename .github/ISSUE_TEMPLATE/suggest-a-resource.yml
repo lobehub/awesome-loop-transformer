@@ -1,0 +1,43 @@
+name: Suggest a resource
+description: Recommend a paper, model, checkpoint, technical report, or research tool.
+title: "[Suggestion] "
+body:
+  - type: input
+    id: title
+    attributes:
+      label: Resource title
+      placeholder: Paper title or model name and variant
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Primary source
+      description: Link to the paper, publisher's model card, technical report, or authors' repository.
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Resource type
+      options:
+        - Paper
+        - Model or checkpoint
+        - Technical report
+        - Research code or tool
+        - Architecture figure
+    validations:
+      required: true
+  - type: textarea
+    id: mechanism
+    attributes:
+      label: What repeats?
+      description: Describe one iteration and what carries into the next. For a tool or figure, identify the mechanism it helps readers inspect.
+      placeholder: The decoder applies its middle block twice to the same token prefix. The second pass reuses the weights and takes the first pass's hidden state as input.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Supporting details
+      description: Useful details include a figure or section number, an experimental baseline, a weight file tree and its license, or the source and reuse terms of an illustration.

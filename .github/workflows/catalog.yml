@@ -1,0 +1,36 @@
+name: Catalog checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check generated README sections
+        run: |
+          python3 scripts/update_readme.py
+          git diff --exit-code -- README.md
+
+      - name: Check catalog papers against the bibliography
+        run: python3 scripts/check_bibliography.py
+
+      - name: Check the Star History chart against its data
+        run: python3 scripts/update_star_history.py --check
+
+      - name: Check local links, images and section anchors
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          lycheeVersion: v0.24.2
+          args: --offline --include-fragments=anchor-only --hidden --no-progress --root-dir . './**/*.md'
