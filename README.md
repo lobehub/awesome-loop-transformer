@@ -12,11 +12,11 @@
 
 A **Loop Transformer** applies the same block of layers repeatedly to an evolving hidden state. Before predicting the next token, a language model can take several passes through that block while keeping the input prefix fixed. [Universal Transformers](https://arxiv.org/abs/1807.03819) · [Huginn](https://arxiv.org/abs/2502.05171)
 
-[Five papers to start with](#selected-readings) · [Models and weights](#models-and-weights) · [Origins](#historical-development) · [Papers by topic](#looped-transformer-papers) · [Other language model loops](#other-loops-in-language-models) · [Technical reports and tools](#technical-reports-and-tools) · [Contribute](#contributing)
+[Five papers to start with](#selected-readings) · [Browse by loop mechanism](#browse-by-loop-mechanism) · [Models and weights](#models-and-weights) · [Origins](#historical-development) · [Papers by topic](#looped-transformer-papers) · [Other language model loops](#other-loops-in-language-models) · [Technical reports and tools](#technical-reports-and-tools) · [Contribute](#contributing)
 
 <!-- catalog:overview -->
 
-The collection includes **73 papers on looped Transformers**, **28 on related language model loops**, and **39 model entries with downloadable weights**.
+The collection includes **75 papers on looped Transformers**, **29 on related language model loops**, and **39 model entries with downloadable weights**.
 
 <!-- /catalog:overview -->
 
@@ -36,6 +36,16 @@ The collection includes **73 papers on looped Transformers**, **28 on related la
 **Reading a depth sweep.** Each curve evaluates Huginn at one recurrent depth. Compare curves at the same training checkpoint to measure the effect of spending more inference compute. Follow one curve over training to see how the model learns to use that depth. [Geiping et al., Figure 6, right panel](https://arxiv.org/html/2502.05171v2#S4.F6)
 
 </details>
+
+## Browse by loop mechanism
+
+| Research question | Examples and reading paths |
+| --- | --- |
+| **Where does the state go on the next pass?** | In the [decoder diagrams](#five-decoder-architectures), Ouro repeats the full stack and Dory repeats its middle layers before emitting the next token. [HRM](#hrm) updates a fast state several times per slow-state update. [Block-Recurrent Transformers](#paper-block-recurrent-transformers) carry state from one block of input tokens to the next. |
+| **Who decides how many passes to run?** | [Inkling 2 Mini](#five-decoder-architectures) uses three passes in its released model. [Huginn](#huginn) lets the caller set the depth. [Mixture-of-Recursions](#paper-mixture-of-recursions) routes each token to a depth. [Ouro’s learned exit gate](#paper-adaptive-depth) uses intermediate states to choose an exit. [FPRM](#fprm) stops at a residual tolerance or a solver limit. |
+| **How is the loop introduced?** | [Huginn](#huginn) is pretrained with a recurrent core. [LoopUS](#loopus) converts a pretrained backbone and trains it to reuse a block. In [Training-Free Looped Transformers](#paper-training-free-looped-transformers), an inference wrapper applies smaller residual updates on repeated passes through a frozen checkpoint. |
+
+In the wider language-model catalog, an iteration can produce a [revised draft](#editing-and-denoising-text), [feedback or a tool observation](#feedback-retrieval-and-search), or [updated model weights](#training-across-rounds).
 
 ## Models and weights
 
@@ -372,13 +382,18 @@ Entries cite the first public release and are grouped by research question. Code
 
 ### Depth allocation and scaling
 
-- Bae et al. (2025). [Mixture-of-Recursions: Learning Dynamic Recursive Depths for Adaptive Token-Level Computation](https://arxiv.org/abs/2507.10524) — A router assigns each token a recurrence depth. The equal-training-FLOP comparisons examine whether concentrating computation on active tokens improves perplexity and downstream accuracy. [Code](https://github.com/raymin0223/mixture_of_recursions)
+The [Huginn](#report-huginn) and [Dory](#report-dory) reports vary inference depth on a single checkpoint. [LoopCoder-v2](#report-loopcoder-v2) compares models trained with different pass counts. [Ouro](#report-ouro) learns an exit gate during pretraining.
+
+- Bae et al. (2025). [Mixture-of-Recursions: Learning Dynamic Recursive Depths for Adaptive Token-Level Computation](https://arxiv.org/abs/2507.10524)<a id="paper-mixture-of-recursions"></a> — A router assigns each token a recurrence depth. The equal-training-FLOP comparisons examine whether concentrating computation on active tokens improves perplexity and downstream accuracy. [Code](https://github.com/raymin0223/mixture_of_recursions)
 - Geiping et al. (2025). [Scaling up Test-Time Compute with Latent Reasoning: A Recurrent Depth Approach](https://arxiv.org/abs/2502.05171) — Presents Huginn, a language model pretrained with a recurrent core. Its depth sweeps evaluate the same checkpoint at different amounts of computation per output token. [Training code](https://github.com/seal-rg/recurrent-pretraining)
 - Schwethelm et al. (2026). [How Much Is One Recurrence Worth? Iso-Depth Scaling Laws for Looped Language Models](https://arxiv.org/abs/2604.21106) — Sweeps one, two, four, and eight recurrences to estimate how much extra unique parameter capacity a shared pass can replace at a given validation loss. [Scaling experiments](https://github.com/kschwethelm/looped-lm-scaling)
 - Yang et al. (2026). [LoopCoder-v2: Only Loop Once for Efficient Test-Time Computation Scaling](https://arxiv.org/abs/2606.18023) — Compares separately trained coding models with different loop counts. Two passes improve on the untied baseline in the authors’ setup, while three or more regress. This tests a training design choice; changing one released checkpoint’s inference depth is a different experiment.
 - Jeddi et al. (2026). [LoopFormer: Elastic-Depth Looped Transformers for Latent Reasoning via Shortcut Modulation](https://arxiv.org/abs/2602.11451) — Trains on different trajectory lengths and conditions shared blocks on time and step size. The authors release standard and looped baselines alongside the proposed models. [Baseline collection](https://huggingface.co/collections/armenjeddi/loopformer)
+- Popescu et al. (2026). [Adaptive Depth in Looped Transformers: Diagnosing Learned Halting Gates and Trajectory Readouts](https://arxiv.org/abs/2607.20519)<a id="paper-adaptive-depth"></a> — Separates how intermediate states are trained from how a model decides when to exit. On arithmetic and parity tasks, confidence scores often match or outperform learned gates. The authors also compare exit rules on Ouro checkpoints.
 
 ### Training across recurrent depth
+
+For pretraining examples, [Ouro](#report-ouro) learns when to exit, while [ARLoop](#report-arloop) studies which earlier states a shared layer should read. [HRM-Text](#report-hrm-text) couples fast and slow updates with instruction–response pretraining. [Nanbeige4.2](#report-nanbeige) follows a looped decoder through pretraining and agent post-training.
 
 - Moosa et al. (2026). [Understanding Dynamic Compute Allocation in Recurrent Transformers](https://arxiv.org/abs/2602.08864) — Uses tasks with controllable token difficulty to evaluate adaptive depth. It measures separately where the model spends computation and how well it generalizes to larger instances. [Code](https://github.com/merlresearch/ANIRA)
 - Williams and Tureci (2026). [Prioritize the Process, Not Just the Outcome: Rewarding Latent Thought Trajectories Improves Reasoning in Looped Language Models](https://arxiv.org/abs/2602.10520) — RLTT distributes credit across latent reasoning steps when tuning Ouro. The experiments compare this objective with GRPO under matched training and inference conditions. [Code](https://github.com/jonwill8/RLTT)
@@ -393,9 +408,12 @@ Entries cite the first public release and are grouped by research question. Code
 
 ### Converting pretrained models
 
+The [retrofitting report and checkpoints](#report-retrofitting) let readers compare newly converted backbones with the same models after recurrent training.
+
 - Bae et al. (2024). [Relaxed Recursive Transformers: Effective Parameter Sharing with Layer-wise LoRA](https://arxiv.org/abs/2410.20672) — Groups pretrained layers into a recurrent stack and adds low-rank updates specific to each depth, testing how much behavior survives weight sharing.
 - McLeish et al. (2025). [Teaching Pretrained Language Models to Think Deeper with Retrofitted Recurrence](https://arxiv.org/abs/2511.07384) — Uses a curriculum to introduce recurrence into pretrained Llama, TinyLlama, and OLMo models. The math experiments compare the retrofit with continued training of the original model under a compute budget. [Training code](https://github.com/mcleish7/retrofitting-recurrence)
 - Park et al. (2026). [LoopUS: Recasting Pretrained LLMs into Looped Latent Refinement Models](https://arxiv.org/abs/2605.11011) — Splits a pretrained model into three stages, gates the input to the recurrent stage, and supervises intermediate depths during post-training. [Code](https://github.com/Thrillcrazyer/LoopUS)
+- Chen et al. (2026). [Training-Free Looped Transformers](https://arxiv.org/abs/2605.23872)<a id="paper-training-free-looped-transformers"></a> — Revisits a contiguous block of middle layers at inference with the checkpoint weights frozen. Direct repetition usually hurts performance in the authors’ tests. Taking smaller residual steps improves accuracy on selected question-answering benchmarks.
 
 ### Interpreting recurrent states
 
@@ -406,6 +424,8 @@ Entries cite the first public release and are grouped by research question. Code
 
 ### Puzzles and recurrent state
 
+For a language-model counterpart to the fast and slow puzzle-solving modules below, see how [HRM-Text](#report-hrm-text) trains the two modules on text.
+
 - Jolicoeur-Martineau (2025). [Less is More: Recursive Reasoning with Tiny Networks](https://arxiv.org/abs/2510.04871) — Tiny Recursive Model refines a candidate answer alongside a latent state. The repository includes attention and MLP variants, making the attention configuration a small Transformer reference. [Code](https://github.com/SamsungSAILMontreal/TinyRecursiveModels)
 - Gao et al. (2025). [Universal Reasoning Model](https://arxiv.org/abs/2512.14693) — Augments a Universal Transformer with short convolutions and truncated backpropagation. Its ARC experiments ablate the components of the recurrent solver. [Code](https://github.com/UbiquantAI/URM)
 - Wang et al. (2025). [Hierarchical Reasoning Model](https://arxiv.org/abs/2506.21734) — Pairs a slower high-level state with a faster low-level state. Its task-specific puzzle checkpoints offer a small-scale setting for tracking successive updates. [Training and evaluation](https://github.com/sapientinc/HRM)
@@ -415,6 +435,8 @@ Entries cite the first public release and are grouped by research question. Code
 - Movahedi et al. (2026). [Fixed-Point Reasoners: Stable and Adaptive Deep Looped Transformers](https://arxiv.org/abs/2606.18206) — Uses convergence of the recurrent state as the stopping signal in a Transformer puzzle solver. Residual scaling and pre-normalization address signal propagation at large depths. [Code](https://github.com/nilskiKonjIzDunava/fprm)
 
 ### Vision, speech, control and tabular data
+
+The [LoopVL release report](#report-loopvl) traces the training stages that produce its recurrent vision–language model.
 
 - Messina et al. (2021). [Recurrent Vision Transformer for Solving Visual Reasoning Problems](https://arxiv.org/abs/2111.14576) — Combines a convolutional front end with a recurrent vision Transformer for same–different judgments. Ablations examine how feedback changes visual reasoning. [Code](https://github.com/mesnico/recurrent_vision_transformer_visual_reasoning)
 - Shen et al. (2021). [Sliced Recursive Transformer](https://arxiv.org/abs/2111.05297) — Reuses vision Transformer layers for image classification. Sliced group self-attention reduces the attention cost of the repeated passes. [Code and model zoo](https://github.com/szq0214/SReT)
@@ -431,6 +453,8 @@ Entries cite the first public release and are grouped by research question. Code
 - Tur et al. (2026). [Recurrent-Depth VLA: Implicit Test-Time Compute Scaling of Vision-Language-Action Models via Latent Iterative Reasoning](https://arxiv.org/abs/2602.07845) — Varies the number of refinements before predicting a robot action. A convergence-based stopping rule lets easy and difficult manipulation decisions use different compute budgets. [Code and suite-specific weights](https://github.com/rd-vla/rd-vla)
 
 ### Inference, attention and memory
+
+The [Dory report and runtime configuration](#report-dory) show how inference handles the KV cache when tokens revisit the middle blocks.
 
 - Geiping et al. (2025). [Efficient Parallel Samplers for Recurrent-Depth Models and Their Connection to Diffusion Language Models](https://arxiv.org/abs/2510.14961) — Overlaps the refinement of several token positions. The authors evaluate a parallel sampler on a pretrained recurrent-depth model without additional tuning.
 - Deng et al. (2026). [LT2: Linear-Time Looped Transformers](https://arxiv.org/abs/2605.20670) — LT2 tests linear, sparse and hybrid attention inside shared blocks. Recurrence can refine linear-attention memory or expand the receptive field of sparse attention. [Code](https://github.com/chili-lab/LT2)
@@ -467,6 +491,7 @@ For layer sharing, recurrent pretraining, halting and deployment, continue to th
 
 - Mikolov et al. (2010). [Recurrent neural network based language model](https://www.isca-archive.org/interspeech_2010/mikolov10_interspeech.html) — Feeds the previous hidden state and the current word into a recurrent layer to predict the next word. This gives a simple baseline for asking what a model keeps as text advances.
 - Dai et al. (2019). [Transformer-XL: Attentive Language Models Beyond a Fixed-Length Context](https://arxiv.org/abs/1901.02860) — Each segment can attend to hidden activations cached from the preceding segment. The current segment produces the memory available to the next one. [Code](https://github.com/kimiyoung/transformer-xl)
+- Hutchins et al. (2022). [Block-Recurrent Transformers](https://arxiv.org/abs/2203.07852)<a id="paper-block-recurrent-transformers"></a> — A Transformer cell processes one block of tokens at a time and updates a set of gated state vectors for the next block. The authors compare long-context language modeling perplexity with Transformer-XL on books, papers and source code. [Original implementation (archived)](https://github.com/google-research/meliad#block-recurrent-transformer)
 - Bulatov et al. (2022). [Recurrent Memory Transformer](https://arxiv.org/abs/2207.06881) — A Transformer reads a small set of memory tokens along with a segment and writes new memory embeddings. The next segment receives those embeddings, so the memory budget can stay fixed as the input grows. [Code](https://github.com/booydar/recurrent-memory-transformer)
 - Peng et al. (2023). [RWKV: Reinventing RNNs for the Transformer Era](https://arxiv.org/abs/2305.13048) — RWKV’s recurrent inference updates a compact state for each new token. Its training formulation can process sequence positions in parallel. [Code](https://github.com/BlinkDL/RWKV-LM)
 - Sun et al. (2023). [Retentive Network: A Successor to Transformer for Large Language Models](https://arxiv.org/abs/2307.08621) — RetNet presents parallel, recurrent and chunkwise forms of the same retention operation. The recurrent form carries a decayed summary of past keys and values. [Code](https://github.com/microsoft/torchscale)
@@ -513,17 +538,19 @@ For layer sharing, recurrent pretraining, halting and deployment, continue to th
 
 ### Technical reports and implementations
 
+The links in the research focus column lead to papers on the same question.
+
 | Release report | Research focus | Author resources |
 | --- | --- | --- |
-| [Huginn recurrent-depth report](https://arxiv.org/abs/2502.05171) | How the recurrent block is pretrained and how performance changes as more compute is spent per token at inference. | [Training and evaluation code](https://github.com/seal-rg/recurrent-pretraining) · [Training dataset](https://huggingface.co/datasets/tomg-group-umd/huginn-dataset) |
-| [Scaling Latent Reasoning via Looped Language Models](https://arxiv.org/abs/2510.25741) | Ouro’s pretraining recipe and the objective used to learn when to exit. Its model card explains the runtime settings that enable adaptive exit. | [Project](https://ouro-llm.github.io/) · [Model card and exit settings](https://huggingface.co/ByteDance/Ouro-1.4B) |
-| [Nanbeige4.2-3B technical report](https://huggingface.co/Nanbeige/Nanbeige4.2-3B/blob/main/Nanbeige42_report.pdf) | How a looped backbone fits into a complete 28T-token pretraining and agent post-training pipeline. The final agent benchmarks reflect that whole pipeline. | [Architecture implementation](https://huggingface.co/Nanbeige/Nanbeige4.2-3B/blob/main/modeling_nanbeige.py) |
-| [LoopCoder-v2 report](https://arxiv.org/abs/2606.18023) | Why cross-loop position offsets and cache sharing matter for parallel looping, and how the authors tested the cost of another pass. | [Implementation](https://github.com/CSJianYang/LoopCoder) · [Released configuration](https://huggingface.co/Multilingual-Multimodal-NLP/LoopCoder-V2/blob/main/config.json) |
-| [ARLoop: Fully-Open Pre-trained Looped Transformers with Attention Residuals](https://arxiv.org/abs/2611.05234) | Sliding-window versus full-history attention across depth, followed by larger pretraining runs. The released baseline is useful when comparing residual designs. | [Pretraining, inference, and evaluation](https://github.com/OSU-NLP-Group/ARLoop) |
-| [Dory1.0-4B: A Looped Normalized-GPT](https://arxiv.org/abs/2611.03998) | How loop count, precision, and KV caching interact in a 4B nGPT. The report distinguishes the training loop schedule from the inference-time choice. | [Runtime configuration](https://huggingface.co/docs/transformers/en/model_doc/dory) |
-| [HRM-Text: Efficient Pretraining Beyond Scaling](https://arxiv.org/abs/2605.20613) | How hierarchical recurrence, normalization, and instruction–response pretraining fit together. The data and objective also change when comparing to conventional pretrained baselines. | [Training framework](https://github.com/sapientinc/HRM-Text) |
-| [Teaching Pretrained Language Models to Think Deeper with Retrofitted Recurrence](https://arxiv.org/abs/2511.07384) | Which backbone is converted and how the recurrence curriculum is scheduled. The checkpoint collection includes untrained conversions and multiple trained depths. | [Full checkpoint collection](https://huggingface.co/collections/tomg-group-umd/retrofitting-recurrence) |
-| [LoopVL: Recurrent Visual Intelligence](https://arxiv.org/abs/2609.38426) | How language pretraining, multimodal training, and post-training are staged for a shared vision–language state. | [Publisher model card](https://huggingface.co/TierFlow/LoopVL) |
+| <a id="report-huginn"></a>[Huginn recurrent-depth report](https://arxiv.org/abs/2502.05171) | How the recurrent block is pretrained and [how performance changes with inference depth](#depth-allocation-and-scaling). | [Training and evaluation code](https://github.com/seal-rg/recurrent-pretraining) · [Training dataset](https://huggingface.co/datasets/tomg-group-umd/huginn-dataset) |
+| <a id="report-ouro"></a>[Scaling Latent Reasoning via Looped Language Models](https://arxiv.org/abs/2510.25741) | How Ouro [supervises predictions at successive depths and trains an exit gate](#training-across-recurrent-depth). The model card documents [how gate scores select an output depth](#depth-allocation-and-scaling). | [Project](https://ouro-llm.github.io/) · [Model card and exit settings](https://huggingface.co/ByteDance/Ouro-1.4B) |
+| <a id="report-nanbeige"></a>[Nanbeige4.2-3B technical report](https://huggingface.co/Nanbeige/Nanbeige4.2-3B/blob/main/Nanbeige42_report.pdf) | How a looped backbone fits into a [28T-token pretraining and agent post-training pipeline](#training-across-recurrent-depth). The final agent benchmarks reflect that whole pipeline. | [Architecture implementation](https://huggingface.co/Nanbeige/Nanbeige4.2-3B/blob/main/modeling_nanbeige.py) |
+| <a id="report-loopcoder-v2"></a>[LoopCoder-v2 report](https://arxiv.org/abs/2606.18023) | Why cross-loop position offsets and cache sharing matter for parallel looping, and how the authors tested [the cost of another pass](#depth-allocation-and-scaling). | [Implementation](https://github.com/CSJianYang/LoopCoder) · [Released configuration](https://huggingface.co/Multilingual-Multimodal-NLP/LoopCoder-V2/blob/main/config.json) |
+| <a id="report-arloop"></a>[ARLoop: Fully-Open Pre-trained Looped Transformers with Attention Residuals](https://arxiv.org/abs/2611.05234) | [Sliding-window versus full-history attention across depth](#training-across-recurrent-depth), followed by larger pretraining runs. The released baseline is useful when comparing residual designs. | [Pretraining, inference, and evaluation](https://github.com/OSU-NLP-Group/ARLoop) |
+| <a id="report-dory"></a>[Dory1.0-4B: A Looped Normalized-GPT](https://arxiv.org/abs/2611.03998) | How [inference depth](#depth-allocation-and-scaling), precision and [KV caching](#inference-attention-and-memory) interact in a 4B nGPT. The report distinguishes the training loop schedule from the inference-time setting. | [Runtime configuration](https://huggingface.co/docs/transformers/en/model_doc/dory) |
+| <a id="report-hrm-text"></a>[HRM-Text: Efficient Pretraining Beyond Scaling](https://arxiv.org/abs/2605.20613) | How [fast and slow recurrent modules](#puzzles-and-recurrent-state) and normalization fit into [instruction–response pretraining](#training-across-recurrent-depth). The data and objective also change when comparing to conventional pretrained baselines. | [Training framework](https://github.com/sapientinc/HRM-Text) |
+| <a id="report-retrofitting"></a>[Teaching Pretrained Language Models to Think Deeper with Retrofitted Recurrence](https://arxiv.org/abs/2511.07384) | How the authors [introduce recurrence into a pretrained backbone](#converting-pretrained-models) and schedule the training curriculum. The checkpoint collection includes untrained conversions and multiple trained depths. | [Full checkpoint collection](https://huggingface.co/collections/tomg-group-umd/retrofitting-recurrence) |
+| <a id="report-loopvl"></a>[LoopVL: Recurrent Visual Intelligence](https://arxiv.org/abs/2609.38426) | How language pretraining, multimodal training, and post-training are staged for a [shared vision–language state](#vision-speech-control-and-tabular-data). | [Publisher model card](https://huggingface.co/TierFlow/LoopVL) |
 
 ### Analysis tools
 

@@ -46,13 +46,18 @@ Entries cite the first public release and are grouped by research question. Code
 
 ## Depth allocation and scaling
 
-- Bae et al. (2025). [Mixture-of-Recursions: Learning Dynamic Recursive Depths for Adaptive Token-Level Computation](https://arxiv.org/abs/2507.10524) — A router assigns each token a recurrence depth. The equal-training-FLOP comparisons examine whether concentrating computation on active tokens improves perplexity and downstream accuracy. [Code](https://github.com/raymin0223/mixture_of_recursions)
+The [Huginn](reports-and-tools.md#report-huginn) and [Dory](reports-and-tools.md#report-dory) reports vary inference depth on a single checkpoint. [LoopCoder-v2](reports-and-tools.md#report-loopcoder-v2) compares models trained with different pass counts. [Ouro](reports-and-tools.md#report-ouro) learns an exit gate during pretraining.
+
+- Bae et al. (2025). [Mixture-of-Recursions: Learning Dynamic Recursive Depths for Adaptive Token-Level Computation](https://arxiv.org/abs/2507.10524)<a id="paper-mixture-of-recursions"></a> — A router assigns each token a recurrence depth. The equal-training-FLOP comparisons examine whether concentrating computation on active tokens improves perplexity and downstream accuracy. [Code](https://github.com/raymin0223/mixture_of_recursions)
 - Geiping et al. (2025). [Scaling up Test-Time Compute with Latent Reasoning: A Recurrent Depth Approach](https://arxiv.org/abs/2502.05171) — Presents Huginn, a language model pretrained with a recurrent core. Its depth sweeps evaluate the same checkpoint at different amounts of computation per output token. [Training code](https://github.com/seal-rg/recurrent-pretraining)
 - Schwethelm et al. (2026). [How Much Is One Recurrence Worth? Iso-Depth Scaling Laws for Looped Language Models](https://arxiv.org/abs/2604.21106) — Sweeps one, two, four, and eight recurrences to estimate how much extra unique parameter capacity a shared pass can replace at a given validation loss. [Scaling experiments](https://github.com/kschwethelm/looped-lm-scaling)
 - Yang et al. (2026). [LoopCoder-v2: Only Loop Once for Efficient Test-Time Computation Scaling](https://arxiv.org/abs/2606.18023) — Compares separately trained coding models with different loop counts. Two passes improve on the untied baseline in the authors’ setup, while three or more regress. This tests a training design choice; changing one released checkpoint’s inference depth is a different experiment.
 - Jeddi et al. (2026). [LoopFormer: Elastic-Depth Looped Transformers for Latent Reasoning via Shortcut Modulation](https://arxiv.org/abs/2602.11451) — Trains on different trajectory lengths and conditions shared blocks on time and step size. The authors release standard and looped baselines alongside the proposed models. [Baseline collection](https://huggingface.co/collections/armenjeddi/loopformer)
+- Popescu et al. (2026). [Adaptive Depth in Looped Transformers: Diagnosing Learned Halting Gates and Trajectory Readouts](https://arxiv.org/abs/2607.20519)<a id="paper-adaptive-depth"></a> — Separates how intermediate states are trained from how a model decides when to exit. On arithmetic and parity tasks, confidence scores often match or outperform learned gates. The authors also compare exit rules on Ouro checkpoints.
 
 ## Training across recurrent depth
+
+For pretraining examples, [Ouro](reports-and-tools.md#report-ouro) learns when to exit, while [ARLoop](reports-and-tools.md#report-arloop) studies which earlier states a shared layer should read. [HRM-Text](reports-and-tools.md#report-hrm-text) couples fast and slow updates with instruction–response pretraining. [Nanbeige4.2](reports-and-tools.md#report-nanbeige) follows a looped decoder through pretraining and agent post-training.
 
 - Moosa et al. (2026). [Understanding Dynamic Compute Allocation in Recurrent Transformers](https://arxiv.org/abs/2602.08864) — Uses tasks with controllable token difficulty to evaluate adaptive depth. It measures separately where the model spends computation and how well it generalizes to larger instances. [Code](https://github.com/merlresearch/ANIRA)
 - Williams and Tureci (2026). [Prioritize the Process, Not Just the Outcome: Rewarding Latent Thought Trajectories Improves Reasoning in Looped Language Models](https://arxiv.org/abs/2602.10520) — RLTT distributes credit across latent reasoning steps when tuning Ouro. The experiments compare this objective with GRPO under matched training and inference conditions. [Code](https://github.com/jonwill8/RLTT)
@@ -67,9 +72,12 @@ Entries cite the first public release and are grouped by research question. Code
 
 ## Converting pretrained models
 
+The [retrofitting report and checkpoints](reports-and-tools.md#report-retrofitting) let readers compare newly converted backbones with the same models after recurrent training.
+
 - Bae et al. (2024). [Relaxed Recursive Transformers: Effective Parameter Sharing with Layer-wise LoRA](https://arxiv.org/abs/2410.20672) — Groups pretrained layers into a recurrent stack and adds low-rank updates specific to each depth, testing how much behavior survives weight sharing.
 - McLeish et al. (2025). [Teaching Pretrained Language Models to Think Deeper with Retrofitted Recurrence](https://arxiv.org/abs/2511.07384) — Uses a curriculum to introduce recurrence into pretrained Llama, TinyLlama, and OLMo models. The math experiments compare the retrofit with continued training of the original model under a compute budget. [Training code](https://github.com/mcleish7/retrofitting-recurrence)
 - Park et al. (2026). [LoopUS: Recasting Pretrained LLMs into Looped Latent Refinement Models](https://arxiv.org/abs/2605.11011) — Splits a pretrained model into three stages, gates the input to the recurrent stage, and supervises intermediate depths during post-training. [Code](https://github.com/Thrillcrazyer/LoopUS)
+- Chen et al. (2026). [Training-Free Looped Transformers](https://arxiv.org/abs/2605.23872)<a id="paper-training-free-looped-transformers"></a> — Revisits a contiguous block of middle layers at inference with the checkpoint weights frozen. Direct repetition usually hurts performance in the authors’ tests. Taking smaller residual steps improves accuracy on selected question-answering benchmarks.
 
 ## Interpreting recurrent states
 
@@ -80,6 +88,8 @@ Entries cite the first public release and are grouped by research question. Code
 
 ## Puzzles and recurrent state
 
+For a language-model counterpart to the fast and slow puzzle-solving modules below, see how [HRM-Text](reports-and-tools.md#report-hrm-text) trains the two modules on text.
+
 - Jolicoeur-Martineau (2025). [Less is More: Recursive Reasoning with Tiny Networks](https://arxiv.org/abs/2510.04871) — Tiny Recursive Model refines a candidate answer alongside a latent state. The repository includes attention and MLP variants, making the attention configuration a small Transformer reference. [Code](https://github.com/SamsungSAILMontreal/TinyRecursiveModels)
 - Gao et al. (2025). [Universal Reasoning Model](https://arxiv.org/abs/2512.14693) — Augments a Universal Transformer with short convolutions and truncated backpropagation. Its ARC experiments ablate the components of the recurrent solver. [Code](https://github.com/UbiquantAI/URM)
 - Wang et al. (2025). [Hierarchical Reasoning Model](https://arxiv.org/abs/2506.21734) — Pairs a slower high-level state with a faster low-level state. Its task-specific puzzle checkpoints offer a small-scale setting for tracking successive updates. [Training and evaluation](https://github.com/sapientinc/HRM)
@@ -89,6 +99,8 @@ Entries cite the first public release and are grouped by research question. Code
 - Movahedi et al. (2026). [Fixed-Point Reasoners: Stable and Adaptive Deep Looped Transformers](https://arxiv.org/abs/2606.18206) — Uses convergence of the recurrent state as the stopping signal in a Transformer puzzle solver. Residual scaling and pre-normalization address signal propagation at large depths. [Code](https://github.com/nilskiKonjIzDunava/fprm)
 
 ## Vision, speech, control and tabular data
+
+The [LoopVL release report](reports-and-tools.md#report-loopvl) traces the training stages that produce its recurrent vision–language model.
 
 - Messina et al. (2021). [Recurrent Vision Transformer for Solving Visual Reasoning Problems](https://arxiv.org/abs/2111.14576) — Combines a convolutional front end with a recurrent vision Transformer for same–different judgments. Ablations examine how feedback changes visual reasoning. [Code](https://github.com/mesnico/recurrent_vision_transformer_visual_reasoning)
 - Shen et al. (2021). [Sliced Recursive Transformer](https://arxiv.org/abs/2111.05297) — Reuses vision Transformer layers for image classification. Sliced group self-attention reduces the attention cost of the repeated passes. [Code and model zoo](https://github.com/szq0214/SReT)
@@ -105,6 +117,8 @@ Entries cite the first public release and are grouped by research question. Code
 - Tur et al. (2026). [Recurrent-Depth VLA: Implicit Test-Time Compute Scaling of Vision-Language-Action Models via Latent Iterative Reasoning](https://arxiv.org/abs/2602.07845) — Varies the number of refinements before predicting a robot action. A convergence-based stopping rule lets easy and difficult manipulation decisions use different compute budgets. [Code and suite-specific weights](https://github.com/rd-vla/rd-vla)
 
 ## Inference, attention and memory
+
+The [Dory report and runtime configuration](reports-and-tools.md#report-dory) show how inference handles the KV cache when tokens revisit the middle blocks.
 
 - Geiping et al. (2025). [Efficient Parallel Samplers for Recurrent-Depth Models and Their Connection to Diffusion Language Models](https://arxiv.org/abs/2510.14961) — Overlaps the refinement of several token positions. The authors evaluate a parallel sampler on a pretrained recurrent-depth model without additional tuning.
 - Deng et al. (2026). [LT2: Linear-Time Looped Transformers](https://arxiv.org/abs/2605.20670) — LT2 tests linear, sparse and hybrid attention inside shared blocks. Recurrence can refine linear-attention memory or expand the receptive field of sparse attention. [Code](https://github.com/chili-lab/LT2)

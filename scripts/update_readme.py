@@ -62,6 +62,8 @@ def home_links(text):
     return (text.replace("](../assets/", "](assets/")
                 .replace("](../references.bib)", "](references.bib)")
                 .replace("](model-architectures.md#", "](#")
+                .replace("](reports-and-tools.md#", "](#")
+                .replace("](research-and-code.md#", "](#")
                 .replace("](../README.md#", "](#")
                 .replace("](research-and-code.md)", "](#looped-transformer-papers)"))
 
