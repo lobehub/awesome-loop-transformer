@@ -7,6 +7,7 @@ A Looped Transformer applies the same Transformer block or layer stack more than
 - [Start here](#start-here)
 - [Models and weights](#models-and-weights)
 - [Research papers](#research-papers)
+  - [More papers and implementations](docs/research-and-code.md)
 - [Technical reports and implementations](#technical-reports-and-implementations)
 - [Analysis tools](#analysis-tools)
 - [Related lists](#related-lists)
@@ -39,6 +40,8 @@ Checkpoint links open the publisher’s file tree. Each entry was checked for pu
 | RD-VLA | Repeats a weight-tied Transformer in the action head. Each file tree includes the action head and its associated model components for one LIBERO evaluation suite. | [Spatial, 40k steps](https://huggingface.co/hqfang/12_24-24_24_Spatial_40k/tree/main) · [Long, 75k steps](https://huggingface.co/hqfang/12_24-24_24_Long_75k/tree/main) | [RD-VLA paper](https://arxiv.org/abs/2602.07845) | Apache-2.0 |
 
 ## Research papers
+
+The [extended paper and code index](docs/research-and-code.md) covers early translation systems, algorithmic constructions, puzzle solvers, training methods, multimodal applications, and inference engines.
 
 ### Sharing weights and learning algorithms
 
