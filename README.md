@@ -1,19 +1,33 @@
-# Awesome Looped Transformers [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
+# Awesome Loops in Language Models [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
 
-A Looped Transformer applies the same Transformer block or layer stack more than once across effective depth. The parameters can stay fixed while the amount of computation changes. This list connects architectural papers to model releases, downloadable weights, and experiments on when another pass helps.
+Papers, models, downloadable weights and technical reports on repeated computation in language models. A loop can refine a hidden state, carry memory into the next segment, revise a draft, act on feedback or produce the training data for a later model. The Looped Transformer collection also covers related work in vision, control and algorithmic reasoning.
 
 ## Contents
 
+- [Find a loop by mechanism](#find-a-loop-by-mechanism)
+  - [Language model papers and implementations](docs/language-model-loops.md)
 - [Start here](#start-here)
 - [Models and weights](#models-and-weights)
-- [Research papers](#research-papers)
+- [Looped Transformer papers](#research-papers)
   - [More papers and implementations](docs/research-and-code.md)
 - [Technical reports and implementations](#technical-reports-and-implementations)
 - [Analysis tools](#analysis-tools)
 - [Related lists](#related-lists)
 
+## Find a loop by mechanism
+
+| Where the loop runs | What goes into the next step | Examples |
+| --- | --- | --- |
+| Shared depth or equilibrium | A hidden state revisits the same block or a solver refines it toward a fixed point. | [Looped Transformers](#research-papers) · [Equilibrium models](docs/language-model-loops.md#recurrent-depth-and-equilibrium) |
+| Sequence memory | The next token or segment receives a recurrent state, cached activations or memory tokens. | [Transformer-XL, RWKV, Mamba](docs/language-model-loops.md#memory-across-tokens-and-segments) |
+| Intermediate reasoning | The next step consumes a rationale token, a pause position or a continuous thought vector. | [Quiet-STaR, Coconut](docs/language-model-loops.md#intermediate-steps-before-an-answer) |
+| Iterative decoding | The next pass edits a draft or fills part of a masked sequence. | [Mask-Predict, LLaDA](docs/language-model-loops.md#editing-and-denoising-text) |
+| Feedback and search | A new model call receives a critique, observation, retrieved passage or partially explored branch. | [Self-Refine, ReAct, Tree of Thoughts](docs/language-model-loops.md#feedback-retrieval-and-search) |
+| Training across rounds | Generated examples or a previous policy supply data for the next model update. | [STaR, ReST, SPIN](docs/language-model-loops.md#training-across-rounds) |
+
 ## Start here
 
+- **Compare three kinds of extra computation.** Trace a [Coconut latent step](docs/language-model-loops.md#intermediate-steps-before-an-answer), a [LLaDA denoising step](docs/language-model-loops.md#editing-and-denoising-text) and a [Self-Refine revision](docs/language-model-loops.md#feedback-retrieval-and-search). Each changes a different part of the answer-generation process.
 - **Understand the architecture.** [Universal Transformers](https://arxiv.org/abs/1807.03819) shows how a shared update can refine every token’s representation across depth. Its adaptive variant lets individual positions stop at different steps.
 - **Try changing depth on one checkpoint.** [Huginn’s model card](https://huggingface.co/tomg-group-umd/huginn-0125) gives inference examples and identifies the recurrent core, input layers, and output layers. Vary the recurrence count while keeping the prompt and decoding settings fixed.
 - **Interpret a scaling claim.** [How Much Is One Recurrence Worth?](https://arxiv.org/abs/2604.21106) compares tied and untied models at the same executed depth. In one reported configuration, a 410M-parameter model with four recurrences matched the validation loss of a 580M untied model at roughly the training cost of a 1B untied model. Parameter savings and compute savings answer different questions.
@@ -21,6 +35,8 @@ A Looped Transformer applies the same Transformer block or layer stack more than
 ## Models and weights
 
 Checkpoint links open the publisher’s file tree. Each entry was checked for public weight files on 2026-11-26. License labels come from the individual model cards; “unspecified” means the card metadata does not declare a weight license. For sharded releases, the file tree includes the index and individual shards.
+
+### Shared-depth models
 
 | Model family | What it offers | Official weight files | Paper or report | Weight license |
 | --- | --- | --- | --- | --- |
@@ -39,9 +55,18 @@ Checkpoint links open the publisher’s file tree. Each entry was checked for pu
 | LoopVL | Refines a joint vision–language state through module-level and model-level loops. The authors expose the two recurrence counts for inference. | [LoopVL-1B](https://huggingface.co/TierFlow/LoopVL/tree/main) | [LoopVL paper](https://arxiv.org/abs/2609.38426) | Unspecified |
 | RD-VLA | Repeats a weight-tied Transformer in the action head. Each file tree includes the action head and its associated model components for one LIBERO evaluation suite. | [Spatial, 40k steps](https://huggingface.co/hqfang/12_24-24_24_Spatial_40k/tree/main) · [Long, 75k steps](https://huggingface.co/hqfang/12_24-24_24_Long_75k/tree/main) | [RD-VLA paper](https://arxiv.org/abs/2602.07845) | Apache-2.0 |
 
+### Sequence recurrence and iterative decoding
+
+| Model family | State or output updated | Official weight files | Paper | Weight license |
+| --- | --- | --- | --- | --- |
+| RWKV-4 | Updates the recurrent state once per input token. | [169M Pile](https://huggingface.co/RWKV/rwkv-4-169m-pile/tree/main) | [RWKV](https://arxiv.org/abs/2305.13048) | Unspecified |
+| Mamba | Updates a selective state-space representation as the sequence advances. | [130M base, original format](https://huggingface.co/state-spaces/mamba-130m/tree/main) | [Mamba](https://arxiv.org/abs/2312.00752) | Apache-2.0 |
+| MDLM | Repeatedly denoises a partially masked sequence. | [OpenWebText checkpoint](https://huggingface.co/kuleshov-group/mdlm-owt/tree/main) | [MDLM](https://arxiv.org/abs/2406.07524) | Apache-2.0 |
+| LLaDA | Repeatedly fills masked response positions conditioned on the prompt. | [8B Instruct](https://huggingface.co/GSAI-ML/LLaDA-8B-Instruct/tree/main) | [LLaDA](https://arxiv.org/abs/2502.09992) | MIT |
+
 ## Research papers
 
-The [extended paper and code index](docs/research-and-code.md) covers early translation systems, algorithmic constructions, puzzle solvers, training methods, multimodal applications, and inference engines.
+This section focuses on Looped Transformers. The [language model bibliography](docs/language-model-loops.md) covers other loop mechanisms. The [extended Transformer index](docs/research-and-code.md) covers early translation systems, algorithmic constructions, puzzle solvers, training methods, multimodal applications, and inference engines.
 
 ### Sharing weights and learning algorithms
 
