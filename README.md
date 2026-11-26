@@ -1,6 +1,8 @@
 # awesome-Loop-Transformer [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
 
-[中文导读](README.zh-CN.md) · [Papers by topic](docs/research-and-code.md) · [Model weights](docs/models-and-weights.md) · [Reports and tools](docs/reports-and-tools.md) · [Other loops in language models](docs/language-model-loops.md)
+![A Transformer block feeds its updated hidden state back into the same block, reusing its weights across depth.](assets/loop-transformer-cover.png)
+
+[Papers by topic](docs/research-and-code.md) · [Model weights](docs/models-and-weights.md) · [Reports and tools](docs/reports-and-tools.md) · [Other loops in language models](docs/language-model-loops.md)
 
 A reading guide to Transformers that reuse layers across depth. Start with the architecture, follow its origins in adaptive computation and machine translation, then try varying the depth of a released language model.
 
