@@ -17,6 +17,8 @@ An annotated bibliography of Transformers that reuse parameters across depth. Th
 - [Definition and notation](#definition-and-notation)
 - [Historical development](#historical-development)
 - [Selected readings](#selected-readings)
+- [Model weights](docs/models-and-weights.md)
+- [Model architecture figures](docs/model-architectures.md)
 - [Research collections](#research-collections)
 - [Bibliography and contributions](#bibliography-and-contributions)
 
@@ -52,6 +54,7 @@ The sequence follows the evidence from architectural design to learned algorithm
 | Collection | Coverage |
 | --- | --- |
 | [Looped Transformer papers](docs/research-and-code.md) | [Algorithm learning](docs/research-and-code.md#algorithms-and-length-generalization), [depth allocation and scaling](docs/research-and-code.md#depth-allocation-and-scaling), training, interpretability, applications and [inference systems](docs/research-and-code.md#inference-attention-and-memory). |
+| [Model architecture figures](docs/model-architectures.md) | Annotated original figures showing what each model repeats, which states it carries forward, and how it chooses depth. |
 | [Models and weights](docs/models-and-weights.md) | Architecture notes, named checkpoints, publisher file trees and weight licenses. |
 | [Technical reports and tools](docs/reports-and-tools.md) | Training recipes, evaluation harnesses, analysis notebooks and related reading lists. |
 | [Other loops in language models](docs/language-model-loops.md) | Sequence memory, latent thought, iterative decoding, search, feedback and multi-round training. |
