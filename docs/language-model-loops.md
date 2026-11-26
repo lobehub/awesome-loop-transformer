@@ -1,6 +1,6 @@
 # Loops in language models
 
-[Main list](../README.md) · [Shared-depth papers and implementations](research-and-code.md) · [Model weights](../README.md#models-and-weights)
+[Main list](../README.md) · [Shared-depth papers and implementations](research-and-code.md) · [Model weights](models-and-weights.md)
 
 Follow the state from one iteration to the next. With a fixed prompt, an equilibrium model can refine one hidden state many times. A recurrent sequence model instead reads new input at each step. Both reuse computation, but a step buys something different in each case.
 
@@ -15,7 +15,7 @@ Follow the state from one iteration to the next. With a fixed prompt, an equilib
 
 - [Deep Equilibrium Models](https://arxiv.org/abs/1909.01377) (2019) — A fixed-point solver repeatedly evaluates a shared transformation until its state settles or the solver reaches its budget. The paper tests an equilibrium self-attention model on language modeling. Read alongside the fixed-pass and adaptive-depth Transformers in the main list. [Code](https://github.com/locuslab/deq)
 
-For layer sharing, recurrent pretraining, halting and deployment, continue to the [core Transformer bibliography](../README.md#research-papers) and its [extended index](research-and-code.md).
+For layer sharing, recurrent pretraining, halting and deployment, continue to the [reading path](../README.md#five-papers-to-read-in-order) and the [Transformer bibliography](research-and-code.md).
 
 ## Memory across tokens and segments
 
