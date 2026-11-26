@@ -41,6 +41,7 @@ Each image below opens the numbered figure in its paper. Start with Huginn for a
 | [LoopVL](#loopvl) | Two scales of visual refinement |
 | [LoopedWAM](#loopedwam) | Separate depths for vision and action |
 | [Dooop](#dooop) | A shared denoiser trained from a teacher |
+| [Solv3R](#solv3r) | One shared block refines camera poses and depth across views |
 
 ## Huginn
 
@@ -121,3 +122,11 @@ The video expert reuses its core to encode the frame and caches its keys and val
 Panel (c) unrolls the student at a single diffusion time. Each round applies the same Transformer blocks to the previous hidden state and produces an intermediate output. These depth updates occur inside a denoising step. The teacher supplies the training targets.
 
 [Original figure 2](https://arxiv.org/html/2611.31977v1#S3.F2) · [Paper](https://arxiv.org/abs/2611.31977) · [Weight files](https://huggingface.co/ShimaRinC/Distill-to-Loop/tree/main)
+
+## Solv3R
+
+[![Solv3R uses one shared Transformer block to refine multiple views. New views can enter the loop alongside earlier ones.](https://ubc-vision.github.io/solv3r/static/images/method_solver.jpg)](https://arxiv.org/html/2611.02857v2#S2.F4)
+
+Follow one view across the solver calls. Each call applies the same block, attending first within each image and then across views. When a new image arrives, the block can refine its initial state alongside the current states of earlier views. Decoding those states gives updated camera poses and depth maps.
+
+Figure 4 by Jeong-gi Kwak et al. (2026), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). [Original figure 4](https://arxiv.org/html/2611.02857v2#S2.F4) · [Project page](https://ubc-vision.github.io/solv3r/) · [117M checkpoint](https://huggingface.co/jgkwak/solv3r/tree/main)
