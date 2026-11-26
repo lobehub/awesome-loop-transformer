@@ -2,21 +2,28 @@
 
 [Overview](../README.md) · [Models and weights](models-and-weights.md) · [Research papers](research-and-code.md)
 
-## Five released decoder designs
+<a id="five-released-decoder-designs"></a>
 
-![Forward-pass schedules for five models. Dark blue marks the first pass through the shared core, light blue marks later passes with the same weights, and gray marks layers executed once. The counts are also listed in the table below.](../assets/decoder-depth-comparison.png)
+## Five decoder architectures
 
-Ouro and Nanbeige repeat their entire decoder stacks. GLM-5.4, Dory and Inkling keep a prefix and suffix outside the loop. For example, GLM-5.4 runs layers 1–26 once, 27–54 twice, then 55–78 once. That gives 78 distinct blocks and 106 block applications per token. The diagram counts decoder blocks at the indicated settings and excludes the embedding and output head.
+Ouro and Nanbeige repeat the full decoder. GLM-5.4, Dory and Inkling repeat only the middle blocks. The model names link to Sebastian Raschka’s diagrams. The pass schedules link to the publishers’ configurations or release notes. Weight availability was checked on 26 November 2026.
 
-| Model | Pass schedule | Distinct blocks | Block applications | Architecture diagram and primary source |
+| Model | Pass schedule | Distinct blocks | Block applications per token | Weights |
 | --- | --- | ---: | ---: | --- |
-| Ouro-Thinking 2.6B | 48 × 4 | 48 | 192 | [Gallery diagram](https://sebastianraschka.com/llm-architecture-gallery/models/ouro-thinking-2-6b/) · [2.6B Thinking config](https://huggingface.co/ByteDance/Ouro-2.6B-Thinking/blob/main/config.json) |
-| Nanbeige 4.2 3B | 22 × 2 | 22 | 44 | [Gallery diagram](https://sebastianraschka.com/llm-architecture-gallery/models/nanbeige-4-2-3b/) · [Config](https://huggingface.co/Nanbeige/Nanbeige4.2-3B/blob/main/config.json) |
-| GLM-5.4 | 26 + 28 × 2 + 24 | 78 | 106 | [Gallery diagram](https://sebastianraschka.com/llm-architecture-gallery/models/glm-5-4/) · [Z.ai release](https://z.ai/blog/glm-5.4) |
-| Dory1.0 4B | 8 + 20 × 2 + 8 | 36 | 56 | [Gallery diagram](https://sebastianraschka.com/llm-architecture-gallery/models/dory1-0-4b/) · [BF16 config](https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16/blob/main/config.json) |
-| Inkling 2 Mini | 6 + 12 × 3 + 6 | 24 | 48 | [Gallery diagram](https://sebastianraschka.com/llm-architecture-gallery/models/inkling-2-mini/) · [Release config](https://huggingface.co/thinkingmachines/Inkling-2-Mini/blob/main/config.json) |
+| [Ouro-Thinking 2.6B](https://sebastianraschka.com/llm-architecture-gallery/models/ouro-thinking-2-6b/) | [48 × 4](https://huggingface.co/ByteDance/Ouro-2.6B-Thinking/blob/main/config.json) | 48 | 192 | [Thinking checkpoint](https://huggingface.co/ByteDance/Ouro-2.6B-Thinking/tree/main) |
+| [Nanbeige 4.2 3B](https://sebastianraschka.com/llm-architecture-gallery/models/nanbeige-4-2-3b/) | [22 × 2](https://huggingface.co/Nanbeige/Nanbeige4.2-3B/blob/main/config.json) | 22 | 44 | [Post-trained checkpoint](https://huggingface.co/Nanbeige/Nanbeige4.2-3B/tree/main) |
+| [GLM-5.4](https://sebastianraschka.com/llm-architecture-gallery/models/glm-5-4/) | [26 + 28 × 2 + 24](https://z.ai/blog/glm-5.4?lang=en) | 78 | 106 | Release planned |
+| [Dory1.0 4B](https://sebastianraschka.com/llm-architecture-gallery/models/dory1-0-4b/) | [8 + 20 × 2 + 8](https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16/blob/main/config.json) | 36 | 56 | [BF16 checkpoint](https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16/tree/main) |
+| [Inkling 2 Mini](https://sebastianraschka.com/llm-architecture-gallery/models/inkling-2-mini/) | [6 + 12 × 3 + 6](https://huggingface.co/thinkingmachines/Inkling-2-Mini/blob/main/config.json) | 24 | 48 | [Fixed three-pass checkpoint](https://huggingface.co/thinkingmachines/Inkling-2-Mini/tree/main) |
 
-Sebastian Raschka’s *LLM Architecture Gallery* provides the five detailed schematics linked above. The summary graphic unrolls their decoder schedules using one counting convention. In particular, Dory’s config counts attention and feed-forward sublayers separately: its 40 recurrent sublayers form 20 recurrent Transformer blocks. [Gallery comparison](https://sebastianraschka.com/llm-architecture-gallery/looped-depth-sharing/)
+<details>
+<summary>Trace the five pass schedules block by block</summary>
+
+![Forward-pass schedules for five models. Dark blue marks the first pass through the shared core, light blue marks later passes with the same weights, and gray marks layers executed once.](../assets/decoder-depth-comparison.png)
+
+GLM-5.4 runs layers 1–26 once, 27–54 twice and 55–78 once, for 106 block applications across 78 distinct blocks. Counts exclude embedding and output layers. Dory’s configuration counts attention and feed-forward sublayers separately, so its 40 recurrent sublayers correspond to 20 Transformer blocks. [Gallery comparison](https://sebastianraschka.com/llm-architecture-gallery/looped-depth-sharing/)
+
+</details>
 
 ## Figures from the papers
 

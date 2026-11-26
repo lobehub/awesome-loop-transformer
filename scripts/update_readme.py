@@ -68,7 +68,7 @@ def home_links(text):
 
 def main():
     figures = sections("model-architectures.md")
-    schedule = figures.pop("Five released decoder designs")
+    schedule = figures.pop("Five decoder architectures")
     figures.pop("Figures from the papers")
     reports = sections("reports-and-tools.md")
     reports.pop("Contents")

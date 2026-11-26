@@ -4,7 +4,7 @@ You can [suggest a resource](https://github.com/lobehub/awesome-loop-transformer
 
 ## What qualifies
 
-A reader should be able to trace one iteration. What operation repeats? What state reaches the next pass? What sets the pass count or stops the loop? For example, Ouro-Thinking 2.6B passes its hidden states through the same 48 decoder blocks four times, for 192 block applications per token. [Architecture and configuration](docs/model-architectures.md#five-released-decoder-designs)
+A reader should be able to trace one iteration. What operation repeats? What state reaches the next pass? What sets the pass count or stops the loop? For example, Ouro-Thinking 2.6B passes its hidden states through the same 48 decoder blocks four times, for 192 block applications per token. [Architecture and configuration](docs/model-architectures.md#five-decoder-architectures)
 
 Shared layers, recurrent depth and their applications belong in the [Looped Transformer bibliography](docs/research-and-code.md). The [wider language-model index](docs/language-model-loops.md) covers memory across segments, intermediate reasoning, iterative decoding, feedback, search and training across rounds. Ordinary autoregressive decoding and optimizer steps qualify when the work specifically studies those iterations.
 

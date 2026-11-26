@@ -12,7 +12,7 @@
 
 A **Loop Transformer** applies the same block of layers repeatedly to an evolving hidden state. Before predicting the next token, a language model can take several passes through that block while keeping the input prefix fixed. [Universal Transformers](https://arxiv.org/abs/1807.03819) · [Huginn](https://arxiv.org/abs/2502.05171)
 
-[Models and weights](#models-and-weights) · [Origins](#historical-development) · [Five papers to start with](#selected-readings) · [Papers by topic](#looped-transformer-papers) · [Other language model loops](#other-loops-in-language-models) · [Technical reports and tools](#technical-reports-and-tools) · [Contribute](#contributing)
+[Five papers to start with](#selected-readings) · [Models and weights](#models-and-weights) · [Origins](#historical-development) · [Papers by topic](#looped-transformer-papers) · [Other language model loops](#other-loops-in-language-models) · [Technical reports and tools](#technical-reports-and-tools) · [Contribute](#contributing)
 
 <!-- catalog:overview -->
 
@@ -20,36 +20,55 @@ The collection includes **73 papers on looped Transformers**, **28 on related la
 
 <!-- /catalog:overview -->
 
-## Five released decoder designs
+## Selected readings
 
-[![Architectures of Ouro-Thinking 2.6B, Nanbeige 4.2 3B, GLM-5.4, Dory1.0 4B and Inkling 2 Mini. The colored paths show which layers run again.](assets/five-loop-transformer-architectures.jpg)](assets/five-loop-transformer-architectures.jpg)
-
-Follow the return arrow in each diagram. **Ouro-Thinking 2.6B** traverses all 48 decoder blocks four times, for 192 block applications. **GLM-5.4** traverses its first 26 blocks once, its middle 28 twice and its last 24 once. Its 78 distinct blocks do the work of 106 block applications per token. Diagrams by Sebastian Raschka. [LLM Architecture Gallery](https://sebastianraschka.com/llm-architecture-gallery/looped-depth-sharing/)
+1. **How does a layer loop?** Figure 2 of Dehghani et al. (2018) shows attention mixing information across positions and the same block updating each position across depth. [Universal Transformers, Fig. 2](https://arxiv.org/html/1807.03819v3#S2.F2)
+2. **What can the shared update learn?** Yang et al. (2023) compare looped and untied Transformers on in-context linear regression. Follow how prediction error changes with each pass. [Looped Transformers are Better at Learning Learning Algorithms](https://arxiv.org/abs/2311.12424) · [Experiments](https://github.com/Leiay/looped_transformer)
+3. **What does another pass buy at inference?** Geiping et al. (2025) vary the recurrent depth of one Huginn checkpoint. Its `num_steps` setting lets you compare depths with the prompt and decoding settings held fixed. [Scaling up Test-Time Compute with Latent Reasoning](https://arxiv.org/abs/2502.05171) · [NeurIPS proceedings](https://proceedings.neurips.cc/paper_files/paper/2025/hash/3b01972cf31e6fa0fe29e4b8b5c2a0a1-Abstract-Conference.html) · [Checkpoint](https://huggingface.co/tomg-group-umd/huginn-0125)
+4. **Can we read the intermediate states?** Lu et al. (2025) compare two probes at the same depth in Huginn. The probes differ in which intermediate arithmetic results they recover. [Latent Chain-of-Thought?](https://arxiv.org/abs/2507.02199) · [Probe code](https://github.com/wenquanlu/huginn-latent-cot)
+5. **What does sharing save during training?** Schwethelm et al. (2026) report a four-pass 410M model matching the validation loss of a 580M untied model at roughly the training cost of a 1B untied model. [How Much Is One Recurrence Worth?](https://arxiv.org/abs/2604.21106) · [Scaling experiments](https://github.com/kschwethelm/looped-lm-scaling)
 
 <details>
-<summary>Compare all five pass schedules and inspect the source configurations</summary>
+<summary>Read Huginn’s validation curves at different recurrent depths</summary>
 
-<!-- catalog:comparison -->
+[![Huginn validation perplexity measured with different numbers of recurrent passes during pretraining.](https://arxiv.org/html/2502.05171v2/ppl_over_recur.svg)](https://arxiv.org/html/2502.05171v2#S4.F6)
 
-![Forward-pass schedules for five models. Dark blue marks the first pass through the shared core, light blue marks later passes with the same weights, and gray marks layers executed once. The counts are also listed in the table below.](assets/decoder-depth-comparison.png)
-
-Ouro and Nanbeige repeat their entire decoder stacks. GLM-5.4, Dory and Inkling keep a prefix and suffix outside the loop. For example, GLM-5.4 runs layers 1–26 once, 27–54 twice, then 55–78 once. That gives 78 distinct blocks and 106 block applications per token. The diagram counts decoder blocks at the indicated settings and excludes the embedding and output head.
-
-| Model | Pass schedule | Distinct blocks | Block applications | Architecture diagram and primary source |
-| --- | --- | ---: | ---: | --- |
-| Ouro-Thinking 2.6B | 48 × 4 | 48 | 192 | [Gallery diagram](https://sebastianraschka.com/llm-architecture-gallery/models/ouro-thinking-2-6b/) · [2.6B Thinking config](https://huggingface.co/ByteDance/Ouro-2.6B-Thinking/blob/main/config.json) |
-| Nanbeige 4.2 3B | 22 × 2 | 22 | 44 | [Gallery diagram](https://sebastianraschka.com/llm-architecture-gallery/models/nanbeige-4-2-3b/) · [Config](https://huggingface.co/Nanbeige/Nanbeige4.2-3B/blob/main/config.json) |
-| GLM-5.4 | 26 + 28 × 2 + 24 | 78 | 106 | [Gallery diagram](https://sebastianraschka.com/llm-architecture-gallery/models/glm-5-4/) · [Z.ai release](https://z.ai/blog/glm-5.4) |
-| Dory1.0 4B | 8 + 20 × 2 + 8 | 36 | 56 | [Gallery diagram](https://sebastianraschka.com/llm-architecture-gallery/models/dory1-0-4b/) · [BF16 config](https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16/blob/main/config.json) |
-| Inkling 2 Mini | 6 + 12 × 3 + 6 | 24 | 48 | [Gallery diagram](https://sebastianraschka.com/llm-architecture-gallery/models/inkling-2-mini/) · [Release config](https://huggingface.co/thinkingmachines/Inkling-2-Mini/blob/main/config.json) |
-
-Sebastian Raschka’s *LLM Architecture Gallery* provides the five detailed schematics linked above. The summary graphic unrolls their decoder schedules using one counting convention. In particular, Dory’s config counts attention and feed-forward sublayers separately: its 40 recurrent sublayers form 20 recurrent Transformer blocks. [Gallery comparison](https://sebastianraschka.com/llm-architecture-gallery/looped-depth-sharing/)
-
-<!-- /catalog:comparison -->
+**Reading a depth sweep.** Each curve evaluates Huginn at one recurrent depth. Compare curves at the same training checkpoint to measure the effect of spending more inference compute. Follow one curve over training to see how the model learns to use that depth. [Geiping et al., Figure 6, right panel](https://arxiv.org/html/2502.05171v2#S4.F6)
 
 </details>
 
 ## Models and weights
+
+<a id="five-released-decoder-designs"></a>
+
+### Five decoder architectures
+
+[![Architectures of Ouro-Thinking 2.6B, Nanbeige 4.2 3B, GLM-5.4, Dory1.0 4B and Inkling 2 Mini. The colored paths show which layers run again.](assets/five-loop-transformer-architectures.jpg)](assets/five-loop-transformer-architectures.jpg)
+
+Follow the return arrow to see which layers process the same token again. Diagrams by Sebastian Raschka. [LLM Architecture Gallery](https://sebastianraschka.com/llm-architecture-gallery/looped-depth-sharing/)
+
+<!-- catalog:comparison -->
+
+Ouro and Nanbeige repeat the full decoder. GLM-5.4, Dory and Inkling repeat only the middle blocks. The model names link to Sebastian Raschka’s diagrams. The pass schedules link to the publishers’ configurations or release notes. Weight availability was checked on 26 November 2026.
+
+| Model | Pass schedule | Distinct blocks | Block applications per token | Weights |
+| --- | --- | ---: | ---: | --- |
+| [Ouro-Thinking 2.6B](https://sebastianraschka.com/llm-architecture-gallery/models/ouro-thinking-2-6b/) | [48 × 4](https://huggingface.co/ByteDance/Ouro-2.6B-Thinking/blob/main/config.json) | 48 | 192 | [Thinking checkpoint](https://huggingface.co/ByteDance/Ouro-2.6B-Thinking/tree/main) |
+| [Nanbeige 4.2 3B](https://sebastianraschka.com/llm-architecture-gallery/models/nanbeige-4-2-3b/) | [22 × 2](https://huggingface.co/Nanbeige/Nanbeige4.2-3B/blob/main/config.json) | 22 | 44 | [Post-trained checkpoint](https://huggingface.co/Nanbeige/Nanbeige4.2-3B/tree/main) |
+| [GLM-5.4](https://sebastianraschka.com/llm-architecture-gallery/models/glm-5-4/) | [26 + 28 × 2 + 24](https://z.ai/blog/glm-5.4?lang=en) | 78 | 106 | Release planned |
+| [Dory1.0 4B](https://sebastianraschka.com/llm-architecture-gallery/models/dory1-0-4b/) | [8 + 20 × 2 + 8](https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16/blob/main/config.json) | 36 | 56 | [BF16 checkpoint](https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16/tree/main) |
+| [Inkling 2 Mini](https://sebastianraschka.com/llm-architecture-gallery/models/inkling-2-mini/) | [6 + 12 × 3 + 6](https://huggingface.co/thinkingmachines/Inkling-2-Mini/blob/main/config.json) | 24 | 48 | [Fixed three-pass checkpoint](https://huggingface.co/thinkingmachines/Inkling-2-Mini/tree/main) |
+
+<details>
+<summary>Trace the five pass schedules block by block</summary>
+
+![Forward-pass schedules for five models. Dark blue marks the first pass through the shared core, light blue marks later passes with the same weights, and gray marks layers executed once.](assets/decoder-depth-comparison.png)
+
+GLM-5.4 runs layers 1–26 once, 27–54 twice and 55–78 once, for 106 block applications across 78 distinct blocks. Counts exclude embedding and output layers. Dory’s configuration counts attention and feed-forward sublayers separately, so its 40 recurrent sublayers correspond to 20 Transformer blocks. [Gallery comparison](https://sebastianraschka.com/llm-architecture-gallery/looped-depth-sharing/)
+
+</details>
+
+<!-- /catalog:comparison -->
 
 <!-- catalog:models -->
 
@@ -69,20 +88,20 @@ Checkpoint links open the publisher’s file tree. Each entry was checked for pu
 | ALBERT | A fixed-depth encoder with cross-layer parameter sharing. The base-v2 release is a compact reference for studying weight tying in masked language modeling. | [Base v2](https://huggingface.co/albert/albert-base-v2/tree/main) | [ALBERT](https://arxiv.org/abs/1909.11942) | Apache-2.0 |
 | ARLoop | Uses attention over earlier layer states to decide what each layer reads. The authors also release a 0.6B looped baseline with standard pre-normalization for a same-size residual-design comparison. | [0.6B](https://huggingface.co/osunlp/ARLoop-0.6B/tree/main) · [0.6B baseline](https://huggingface.co/osunlp/ARLoop-baseline-0.6B/tree/main) · [1.2B](https://huggingface.co/osunlp/ARLoop-1.2B/tree/main) | [ARLoop report](https://arxiv.org/abs/2611.05234) | Apache-2.0 |
 | [Attractor LM](#attractor-lm) | A language backbone proposes an output state. A second, shared module refines it toward equilibrium, conditioned on that initial proposal. | [770M](https://huggingface.co/jacobfa1/attractor-770m/tree/main) | [Paper](https://arxiv.org/abs/2605.12466) | MIT |
-| [Dory 1.0](#five-released-decoder-designs) | The default run repeats 20 middle blocks twice between two eight-block stacks. Its last-loop KV-cache mode keeps one set of keys and values across the recurrent passes. | [4B BF16](https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16/tree/main) · [4B NVFP4](https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-NVFP4/tree/main) · [MXFP8](https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-MXFP8/tree/main) · [GGUF](https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-GGUF/tree/main) | [Dory report](https://arxiv.org/abs/2611.03998) | OpenMDW-1.1 |
+| [Dory 1.0](#five-decoder-architectures) | The BF16 checkpoint runs eight prefix blocks, 20 shared blocks twice (`n_recurrent_loops=2`), then eight suffix blocks. The default `recurrent_kv_cache_mode=per_loop` keeps a separate KV cache for each pass. Set it to `last_loop` to keep one cache per recurrent attention layer. | [4B BF16](https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16/tree/main) · [4B NVFP4](https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-NVFP4/tree/main) · [MXFP8](https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-MXFP8/tree/main) · [GGUF](https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-GGUF/tree/main) | [Dory report](https://arxiv.org/abs/2611.03998) · [BF16 config](https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16/blob/main/config.json) · [KV cache settings](https://huggingface.co/nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16#reducing-the-kv-cache-memory-overhead) | OpenMDW-1.1 |
 | Gated Recurrent Transformer (GRT) | A gate blends the previous state with a shared core update between a fixed prelude and coda. Releases include compute-matched and parameter-matched training configurations. | [large-isoflop](https://huggingface.co/Amr-Hegazy/grt-large-isoflop/tree/main) · [large-isoparam](https://huggingface.co/Amr-Hegazy/grt-large-isoparam/tree/main) · [medium-isoflop](https://huggingface.co/Amr-Hegazy/grt-medium-isoflop/tree/main) · [medium-isoparam](https://huggingface.co/Amr-Hegazy/grt-medium-isoparam/tree/main) | [Paper](https://arxiv.org/abs/2608.15062) | CC-BY-4.0 |
 | HRM-Text | Applies fast and slow recurrent modules to text generation. This release uses a task-completion objective on instruction–response pairs. | [1B original release](https://huggingface.co/sapientinc/HRM-Text-1B/tree/main) | [HRM-Text report](https://arxiv.org/abs/2605.20613) | Apache-2.0 |
 | [Huginn](#huginn) | A 3.5B language model with a recurrent core between distinct input and output stacks. The same checkpoint supports different recurrence counts at inference. | [Huginn-0125](https://huggingface.co/tomg-group-umd/huginn-0125/tree/main) | [Recurrent depth report](https://arxiv.org/abs/2502.05171) | Apache-2.0 |
-| [Inkling 2 Mini](#five-released-decoder-designs) | Runs six prefix blocks once, twelve shared middle blocks three times and six suffix blocks once. A separate research checkpoint supports experiments that vary the pass count. | [Inkling 2 Mini](https://huggingface.co/thinkingmachines/Inkling-2-Mini/tree/main) · [Variable-loop research checkpoint](https://huggingface.co/thinkingmachines/TML-d24-varloop-research/tree/main) | [Thinking Machines Lab release](https://thinkingmachines.ai/news/inkling-2-mini/) | Apache-2.0 |
+| [Inkling 2 Mini](#five-decoder-architectures) | Runs six prefix blocks once, twelve shared middle blocks three times and six suffix blocks once. A separate research checkpoint supports experiments that vary the pass count. | [Inkling 2 Mini](https://huggingface.co/thinkingmachines/Inkling-2-Mini/tree/main) · [Variable-loop research checkpoint](https://huggingface.co/thinkingmachines/TML-d24-varloop-research/tree/main) | [Thinking Machines Lab release](https://thinkingmachines.ai/news/inkling-2-mini/) | Apache-2.0 |
 | LEV | Scores the answer options after each pass through a looped backbone. Each release contains an adapter and decision head to use with its base model. | [1.4B adapter](https://huggingface.co/songdj/Lev-1.4B/tree/main) · [2.6B adapter](https://huggingface.co/songdj/Lev-2.6B/tree/main) · [3B adapter](https://huggingface.co/songdj/Lev-3B/tree/main) | [Paper](https://arxiv.org/abs/2610.20951) | Apache-2.0 |
-| LOTUS | A padded sequence reserves positions for latent reasoning steps. Shared passes refine these positions in parallel under supervision from reasoning traces. | [GSM-LLaMA 3B](https://huggingface.co/yingfanbot/gsm-lotus-llama3b/tree/main) · [CODI variant](https://huggingface.co/yingfanbot/gsm-lotus-llama3b-codi/tree/main) · [Natural-language variant](https://huggingface.co/yingfanbot/gsm-lotus-llama3b-nl/tree/main) | [Paper](https://arxiv.org/abs/2606.31779) | MIT |
+| LOTUS | Shared passes refine padded latent reasoning positions in parallel. `from_pretrained` loads the weights. The authors’ GSM8K script runs the loop with `--n_looped_iters 6`. Use `--c_thought 25` for the standard and CODI checkpoints or `--c_thought 50` for the natural-language variant to set the number of tokens per latent block. | [GSM-LLaMA 3B](https://huggingface.co/yingfanbot/gsm-lotus-llama3b/tree/main) · [CODI variant](https://huggingface.co/yingfanbot/gsm-lotus-llama3b-codi/tree/main) · [Natural-language variant](https://huggingface.co/yingfanbot/gsm-lotus-llama3b-nl/tree/main) | [Paper](https://arxiv.org/abs/2606.31779) · [Evaluation script](https://github.com/yingfan-bot/lotus/blob/main/scripts/eval.py) · [GSM8K command](https://huggingface.co/yingfanbot/gsm-lotus-llama3b#reproduce-the-number-above) | MIT |
 | LoopCoder-v2 | A 7B instruction-tuned coding model. The downloadable variant runs its 14 shared layers twice. | [7B two-loop checkpoint](https://huggingface.co/Multilingual-Multimodal-NLP/LoopCoder-V2/tree/main) | [Loop-count study](https://arxiv.org/abs/2606.18023) | Apache-2.0 |
 | LoopFormer | Three models pair different block counts and iteration counts for the same nominal depth of 24. Shortcut modulation allows shorter inference trajectories. | [1 × 24](https://huggingface.co/armenjeddi/LoopFormer-1block-24iterations/tree/main) · [2 × 12](https://huggingface.co/armenjeddi/LoopFormer-2block-12iterations/tree/main) · [3 × 8](https://huggingface.co/armenjeddi/LoopFormer-3block-8iterations/tree/main) | [LoopFormer paper](https://arxiv.org/abs/2602.11451) | Unspecified |
 | LoopRes | Looped layers attend to a window of their own outputs from earlier passes when adapting a pretrained language model. | [Qwen3-1.7B](https://huggingface.co/oahzxl/LoopRes-Qwen3-1.7B/tree/main) | [Paper](https://arxiv.org/abs/2611.31094) | MIT |
 | [LoopUS](#loopus) | Converts Qwen3 into an encoder, shared reasoning block, and decoder. A confidence head can terminate the recurrent stage early. | [Qwen3-1.7B retrofit](https://huggingface.co/Thrillcrazyer/Qwen3_1.7B_LoopUS/tree/main) | [LoopUS paper](https://arxiv.org/abs/2605.11011) | Apache-2.0 |
 | Looped GPT-BERT | The BabyLM Strict-small release traverses four shared layers twelve times. It combines causal and masked next-token training. | [4 layers × 12 passes](https://huggingface.co/Survivor613/BabyLM2026-Strict-Small-looped_GPT-BERT/tree/main) | [Paper](https://arxiv.org/abs/2609.09691) | Unspecified |
 | Metis-1.6 | Praxis and Logos each run a hybrid Mamba-2 and attention mixture-of-experts stack twice per token. | [Logos](https://huggingface.co/Lernex/Metis-1.6-Logos/tree/main) · [Praxis-Base](https://huggingface.co/Lernex/Metis-1.6-Praxis-Base/tree/main) · [Logos-Base](https://huggingface.co/Lernex/Metis-1.6-Logos-Base/tree/main) · [Praxis](https://huggingface.co/Lernex/Metis-1.6-Praxis/tree/main) · [Precision variants](#metis-16) | [Paper](https://arxiv.org/abs/2610.37903) | Apache-2.0 |
-| [Nanbeige4.2](#five-released-decoder-designs) | The 3B model runs all 22 shared layers twice. The report covers the base model and post-training for tool use and coding. The reported 3B count excludes embeddings. | [3B base](https://huggingface.co/Nanbeige/Nanbeige4.2-3B-Base/tree/main) · [3B post-trained](https://huggingface.co/Nanbeige/Nanbeige4.2-3B/tree/main) | [Nanbeige4.2 technical report](https://arxiv.org/abs/2607.22083) | Apache-2.0 |
+| [Nanbeige4.2](#five-decoder-architectures) | The 3B model runs all 22 shared layers twice. The report covers the base model and post-training for tool use and coding. The reported 3B count excludes embeddings. | [3B base](https://huggingface.co/Nanbeige/Nanbeige4.2-3B-Base/tree/main) · [3B post-trained](https://huggingface.co/Nanbeige/Nanbeige4.2-3B/tree/main) | [Nanbeige4.2 technical report](https://arxiv.org/abs/2607.22083) | Apache-2.0 |
 | [Ouro](#ouro) | The 2.6B Thinking config runs 48 shared layers four times. The released implementation computes gate scores at each pass. | [1.4B base](https://huggingface.co/ByteDance/Ouro-1.4B/tree/main) · [1.4B Thinking](https://huggingface.co/ByteDance/Ouro-1.4B-Thinking/tree/main) · [2.6B base](https://huggingface.co/ByteDance/Ouro-2.6B/tree/main) · [2.6B Thinking](https://huggingface.co/ByteDance/Ouro-2.6B-Thinking/tree/main) | [Ouro report](https://arxiv.org/abs/2510.25741) | Apache-2.0 |
 | Retrofitted TinyLlama | Two conversions of the same pretrained backbone with different target training recurrence counts. These are separately trained models. | [4 recurrences](https://huggingface.co/smcleish/Recurrent-TinyLlama-3T-train-recurrence-4/tree/main) · [32 recurrences](https://huggingface.co/smcleish/Recurrent-TinyLlama-3T-train-recurrence-32/tree/main) · [All backbones and controls](#retrofitted-language-models) | [Retrofitting study](https://arxiv.org/abs/2511.07384) | Apache-2.0 |
 
@@ -281,7 +300,7 @@ The publisher provides two model sizes and several inference formats. The follow
 
 ### Research releases
 
-**GLM-5.4.** Z.ai reports converting the pretrained GLM-5 backbone through continued training. The middle 28 decoder layers run twice. Z.ai announced plans to release the weights after safety hardening. As of 2026-11-26, no public checkpoint was listed in its Hugging Face organization. [Architecture comparison](#five-released-decoder-designs) · [Z.ai release](https://z.ai/blog/glm-5.4) · [Publisher model hub](https://huggingface.co/zai-org)
+**GLM-5.4.** Z.ai reports converting the pretrained GLM-5 backbone through continued training. The middle 28 decoder layers run twice. Z.ai announced plans to release the weights after safety hardening. As of 2026-11-26, no public checkpoint was listed in its Hugging Face organization. [Architecture comparison](#five-decoder-architectures) · [Z.ai release](https://z.ai/blog/glm-5.4) · [Publisher model hub](https://huggingface.co/zai-org)
 
 Two papers in the [Awesome-Loop-Models catalog snapshot](https://github.com/huskydoge/Awesome-Loop-Models/tree/3cf1c6b33fc7887a177f0ce0b463e4ea77298d79/catalog) identify releases for which public weight files could not be verified on 2026-11-26. Their author resources are indexed here.
 
@@ -306,20 +325,6 @@ In the Universal Transformer, one step lets a position attend to other positions
 ### Definition and notation
 
 Write one pass as $h^{(t+1)} = F_\theta(h^{(t)})$. The sequence state $h^{(t)}$ changes with each pass, while the parameters $\theta$ are shared. A core with layers A and B, executed three times, applies **A → B → A → B → A → B**. That is six layer applications using two sets of weights. [Recurrent stacking in translation](https://arxiv.org/abs/1807.05353)
-
-## Selected readings
-
-The sequence follows the evidence from architectural design to learned algorithms, inference-time scaling, interpretability and training cost. Years below refer to the first public release.
-
-1. **Architecture · Dehghani et al. (2018).** Figure 2 of *Universal Transformers* shows both axes of computation. Attention exchanges information across positions, while the shared block updates each position across depth. The adaptive variant learns when a position can stop. [Paper and figure](https://arxiv.org/html/1807.03819v3)
-2. **Algorithm learning · Yang et al. (2023).** *Looped Transformers are Better at Learning Learning Algorithms* tests whether sharing an update across depth helps with in-context data fitting. The linear regression experiments make the supervised target, prediction error and comparison to untied layers explicit. [Paper](https://arxiv.org/abs/2311.12424) · [Experiments](https://github.com/Leiay/looped_transformer)
-3. **Inference-time depth · Geiping et al. (2025).** *Scaling up Test-Time Compute with Latent Reasoning* varies recurrence on a single Huginn checkpoint. The released model exposes `num_steps`, so accuracy and latency can be compared at two depths with prompts and decoding held fixed. [Paper](https://arxiv.org/abs/2502.05171) · [NeurIPS proceedings](https://proceedings.neurips.cc/paper_files/paper/2025/hash/3b01972cf31e6fa0fe29e4b8b5c2a0a1-Abstract-Conference.html) · [Checkpoint](https://huggingface.co/tomg-group-umd/huginn-0125)
-4. **Interpretability · Lu et al. (2025).** *Latent Chain-of-Thought?* probes intermediate arithmetic results in Huginn. Comparing Logit Lens and Coda Lens at the same depth reveals how conclusions about readable reasoning steps depend on the probe. [Paper](https://arxiv.org/abs/2507.02199) · [Probe code](https://github.com/wenquanlu/huginn-latent-cot)
-5. **Scaling laws · Schwethelm et al. (2026).** *How Much Is One Recurrence Worth?* relates shared passes to the number of unique parameters needed for a given validation loss. In one reported configuration, a 410M model with four passes matches a 580M untied model at roughly the training cost of a 1B untied model. [Paper](https://arxiv.org/abs/2604.21106) · [Scaling experiments](https://github.com/kschwethelm/looped-lm-scaling)
-
-[![Huginn validation perplexity measured with different numbers of recurrent passes during pretraining.](https://arxiv.org/html/2502.05171v2/ppl_over_recur.svg)](https://arxiv.org/html/2502.05171v2#S4.F6)
-
-**Reading a depth sweep.** Each curve evaluates Huginn at one recurrent depth. Compare curves at the same training checkpoint to measure the effect of spending more inference compute. Follow one curve over training to see how the model learns to use that depth. [Geiping et al., Figure 6, right panel](https://arxiv.org/html/2502.05171v2#S4.F6)
 
 ## Looped Transformer papers
 
