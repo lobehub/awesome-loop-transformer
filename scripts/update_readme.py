@@ -32,12 +32,27 @@ def paper_index(filename):
     return "\n\n".join(parts)
 
 
+def count_model_rows(body):
+    count = 0
+    lines = iter(body.splitlines())
+    for line in lines:
+        columns = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if columns[0] == "Model family" and "Released checkpoints" in columns:
+            next(lines, None)  # Markdown's header separator.
+            for row in lines:
+                if not row.lstrip().startswith("|"):
+                    break
+                count += 1
+    return count
+
+
 def model_index(figures):
     filename = "models-and-weights.md"
     text = (DOCS / filename).read_text(encoding="utf-8")
     provenance = next(line for line in text.splitlines() if line.startswith("Checkpoint links"))
     topics = sections(filename)
     parts = [provenance, topics.pop("Contents")]
+    model_count = 0
     for name, body in topics.items():
         parts.append(f"### {name}")
         if name == "Release variants":
@@ -45,6 +60,8 @@ def model_index(figures):
                 parts.extend([f"#### {title}", details(f"Show all {title} checkpoints", variants)])
             continue
         parts.append(body)
+        if name != "Research releases":
+            model_count += count_model_rows(body)
         # Model names in each table link to the corresponding paper figure.
         slugs = set(re.findall(r"model-architectures\.md#([\w-]+)", body))
         for title, diagram in figures.items():
@@ -55,12 +72,13 @@ def model_index(figures):
                     f"Architecture figure and sources for {title}", f"{image}\n\n{sources}",
                     expanded=title in {"Huginn", "LoopVL"},
                 )])
-    return "\n\n".join(parts)
+    return "\n\n".join(parts), model_count
 
 
 def home_links(text):
     return (text.replace("](../assets/", "](assets/")
                 .replace("](../references.bib)", "](references.bib)")
+                .replace("](models-and-weights.md#", "](#")
                 .replace("](model-architectures.md#", "](#")
                 .replace("](reports-and-tools.md#", "](#")
                 .replace("](research-and-code.md#", "](#")
@@ -74,21 +92,20 @@ def main():
     figures.pop("Figures from the papers")
     reports = sections("reports-and-tools.md")
     reports.pop("Contents")
+    models, model_count = model_index(figures)
     blocks = {
         "comparison": schedule,
-        "models": model_index(figures),
+        "models": models,
         "papers": paper_index("research-and-code.md"),
         "related": paper_index("language-model-loops.md"),
         "reports": "\n\n".join(f"### {title}\n\n{body}" for title, body in reports.items()),
     }
     paper_counts = [len(re.findall(r"^- .+? \(\d{4}\)\. \[", blocks[key], re.MULTILINE))
                     for key in ("papers", "related")]
-    models = sum(line.startswith("| ") and "/tree/main)" in line
-                 for line in blocks["models"].splitlines())
     blocks["overview"] = (
         f"The collection includes **{paper_counts[0]} papers on looped Transformers**, "
         f"**{paper_counts[1]} on related language model loops**, and "
-        f"**{models} model entries with downloadable weights**."
+        f"**{model_count} model entries with downloadable weights**."
     )
     readme = ROOT / "README.md"
     text = readme.read_text(encoding="utf-8")

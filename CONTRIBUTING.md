@@ -13,7 +13,7 @@ Shared layers, recurrent depth and their applications belong in the [Looped Tran
 | Submission | Evidence to include |
 | --- | --- |
 | Paper or preprint | Link the title to the original paper. Give the year of first public release and a sentence explaining the research question or comparison. Keep quantitative claims tied to the task, baseline and measured budget. |
-| Model or checkpoint | Add the named variant to [models and weights](docs/models-and-weights.md). Link the publisher’s file tree containing the weights or shards and cite the model card, config or report for the loop. Label adapters, quantizations and controls. Use the checkpoint’s declared license, or mark it *Unspecified* when the publisher gives none. |
+| Model or checkpoint | Add the named variant to [models and weights](docs/models-and-weights.md). Link the weight files or the publisher’s directory containing them and cite the model card, config or report for the loop. Label adapters, quantizations and controls. Use the checkpoint’s declared license, or mark it *Unspecified* when the publisher gives none. |
 | Technical report, implementation or tool | Add the authors’ report or repository to [reports and tools](docs/reports-and-tools.md). Describe what readers can inspect or run, such as the recurrence schedule, training recipe or evaluation harness. |
 | Architecture figure | Add it to the [figure guide](docs/model-architectures.md) and link it from the matching model entry. Credit the creator, link the original figure or config, and describe the recurrent path in the caption or alt text. Link out to a third-party figure when permission to reproduce it is unclear. |
 

@@ -15,7 +15,7 @@ Follow the state from one iteration to the next. With a fixed prompt, an equilib
 
 ## Recurrent depth and equilibrium
 
-- Bai et al. (2019). [Deep Equilibrium Models](https://arxiv.org/abs/1909.01377) — A fixed-point solver repeatedly evaluates a shared transformation until its state settles or the solver reaches its budget. The paper tests an equilibrium self-attention model on language modeling. Read alongside the fixed-pass and adaptive-depth Transformers in the main list. [Code](https://github.com/locuslab/deq)
+- Bai et al. (2019). [Deep Equilibrium Models](https://arxiv.org/abs/1909.01377) — A fixed-point solver repeatedly evaluates a shared transformation until its state settles or the solver reaches its budget. The paper tests an equilibrium self-attention model on language modeling. Read alongside the fixed-pass and adaptive-depth Transformers in the main list. [Code](https://github.com/locuslab/deq) · [WikiText-103 checkpoint](models-and-weights.md#model-deq-transformer)
 
 For layer sharing, recurrent pretraining, halting and deployment, continue to the [reading path](../README.md#selected-readings) and the [Transformer bibliography](research-and-code.md).
 
