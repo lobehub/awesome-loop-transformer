@@ -1,7 +1,7 @@
 ![A Transformer block feeds its updated hidden state back into the same block, reusing its weights across depth.](assets/loop-transformer-cover.png)
 
 <h1 align="center">
-  awesome-loop-transformer
+  Awesome Loop Transformer
   <a href="https://awesome.re"><img src="https://awesome.re/badge-flat.svg" alt="Awesome"></a>
 </h1>
 
