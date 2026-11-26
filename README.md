@@ -1,5 +1,5 @@
 <h1 align="center">
-  awesome-Loop-Transformer
+  awesome-loop-transformer
   <a href="https://awesome.re"><img src="https://awesome.re/badge-flat.svg" alt="Awesome"></a>
 </h1>
 
