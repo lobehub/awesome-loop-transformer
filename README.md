@@ -18,7 +18,7 @@ An annotated bibliography of Transformers that reuse parameters across depth. Th
 - [Historical development](#historical-development)
 - [Selected readings](#selected-readings)
 - [Model weights](docs/models-and-weights.md)
-- [Model architecture figures](docs/model-architectures.md)
+- [Model architecture figures](docs/model-architectures.md), including a [five-model decoder comparison](docs/model-architectures.md#five-released-decoder-designs)
 - [Research collections](#research-collections)
 - [Bibliography and contributions](#bibliography-and-contributions)
 
